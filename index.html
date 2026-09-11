@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#181F22">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Send It">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Send It — climbing board game mock-up</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;600;700&family=Spectral:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --basalt:#181F22;
+    --rock:#232E33;
+    --rock-lit:#3B4C53;
+    --rock-dark:#1B2428;
+    --chalk:#EFEAE0;
+    --chalk-dim:#A7AFAC;
+    --lichen:#9CB04E;
+    --str:#C3452F;
+    --end:#3E8E8C;
+    --tec:#D9A227;
+    --hexW:104px;
+    --hexH:calc(var(--hexW) * 1.1547);
+    font-size:16px;
+  }
+  *{box-sizing:border-box}
+  .hex,.mat,.die{-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{margin:0;background:var(--basalt);color:var(--chalk);
+    font-family:'Archivo Narrow',"Helvetica Neue",Arial,sans-serif;}
+  body{
+    background-image:
+      radial-gradient(1200px 600px at 20% -10%, rgba(156,176,78,.07), transparent 60%),
+      radial-gradient(900px 500px at 90% 10%, rgba(62,142,140,.06), transparent 60%);
+    background-attachment:fixed;
+  }
+  a{color:var(--lichen)}
+  h1,h2,h3{margin:0;font-weight:600;letter-spacing:.01em}
+
+  .shell{max-width:1360px;margin:0 auto;padding:22px 20px 60px}
+
+  header.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:18px 26px;
+    border-bottom:1px solid rgba(239,234,224,.14);padding-bottom:14px;margin-bottom:22px}
+  .wordmark{font-size:2.1rem;line-height:.95;font-weight:700;letter-spacing:-.01em}
+  .wordmark span{color:var(--lichen)}
+  .routeline{font-family:'Spectral',Georgia,serif;font-style:italic;color:var(--chalk-dim);font-size:1rem}
+  .toolbar{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+
+  button{font-family:inherit;font-size:.9rem;font-weight:600;color:var(--chalk);
+    background:var(--rock);border:1px solid rgba(239,234,224,.2);border-radius:2px;
+    padding:8px 14px;cursor:pointer;transition:background .15s,border-color .15s}
+  button:hover:not(:disabled){background:var(--rock-lit);border-color:var(--lichen)}
+  button:focus-visible{outline:2px solid var(--lichen);outline-offset:2px}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  button.primary{background:var(--lichen);color:#12181A;border-color:var(--lichen);font-size:1.05rem;padding:12px 18px;width:100%}
+  button.primary:hover:not(:disabled){background:#B0C563;border-color:#B0C563}
+
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+  .matband{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+
+  .panel{background:linear-gradient(180deg,rgba(35,46,51,.9),rgba(27,36,40,.9));
+    border:1px solid rgba(239,234,224,.12);border-radius:3px;padding:14px}
+  .panel + .panel{margin-top:16px}
+  .panel h3{font-size:.95rem;color:var(--chalk-dim);font-weight:500;margin-bottom:10px}
+
+  /* ---------- player mats ---------- */
+  .mat{border:1px solid rgba(239,234,224,.16);border-top:3px solid var(--pc);
+    background:linear-gradient(180deg,rgba(35,46,51,.96),rgba(22,29,32,.96));
+    border-radius:4px;padding:11px 12px 10px;position:relative;
+    display:flex;flex-direction:column;gap:8px}
+  .mat.active{border-color:var(--lichen);box-shadow:0 0 0 1px var(--lichen) inset}
+  .mat .who{display:flex;align-items:center;gap:7px}
+  .mat .pip{width:10px;height:10px;border-radius:50%;background:var(--pc);flex:none}
+  .mat .name{font-weight:700;font-size:1.02rem;letter-spacing:.01em}
+  .mat .role{font-family:'Spectral',Georgia,serif;font-style:italic;font-size:.8rem;
+    color:var(--chalk-dim);line-height:1.25;margin-top:-6px}
+  .seat{font-size:.68rem;letter-spacing:.07em;color:var(--chalk-dim);
+    border:1px solid rgba(239,234,224,.25);padding:0 5px;border-radius:2px;margin-left:auto}
+  .badge{font-size:.68rem;letter-spacing:.06em;background:var(--lichen);color:#12181A;
+    padding:1px 5px;border-radius:2px;font-weight:700}
+
+  /* stat line */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+  .stat{text-align:center;padding:4px 0 3px;border:1px solid rgba(239,234,224,.16);
+    border-radius:2px;font-size:.62rem;letter-spacing:.09em;color:var(--chalk-dim)}
+  .stat b{display:block;font-size:1.1rem;line-height:1.1;font-variant-numeric:tabular-nums}
+  .stat.s b{color:var(--str)} .stat.e b{color:var(--end)} .stat.t b{color:var(--tec)}
+
+  /* the ability card sitting in its slot */
+  .cardslot{border:1px solid rgba(156,176,78,.45);border-left:3px solid var(--lichen);
+    border-radius:3px;padding:7px 8px;background:rgba(156,176,78,.07);min-height:74px}
+  .cardhead{display:flex;justify-content:space-between;align-items:baseline;gap:6px;margin-bottom:3px}
+  .cname{color:var(--lichen);font-weight:700;font-size:.83rem;line-height:1.15}
+  .cuses{font-size:.66rem;color:var(--chalk-dim);white-space:nowrap}
+  .ctext{font-size:.72rem;line-height:1.35;color:var(--chalk-dim)}
+
+  /* drop tracker, 8 counters with the ceiling marked */
+  .tlabel{display:flex;justify-content:space-between;align-items:baseline;gap:5px;
+    font-size:.66rem;letter-spacing:.08em;color:var(--chalk-dim);margin-bottom:4px}
+  .tnum{letter-spacing:0;font-size:.76rem;color:var(--chalk);font-weight:600}
+  .track{display:flex;align-items:center;gap:3px}
+  .track .slot{width:13px;height:16px;background:rgba(239,234,224,.10);
+    box-shadow:0 0 0 1px rgba(239,234,224,.18) inset;
+    clip-path:polygon(50% 0,88% 42%,100% 70%,78% 97%,22% 97%,0 70%,12% 42%)}
+  .track .slot.full{background:var(--end);box-shadow:none}
+  .track .slot.over{background:var(--lichen);box-shadow:none}
+  .track .ceil{width:2px;height:18px;background:var(--str);margin:0 3px;flex:none}
+  .thead{font-size:.66rem;color:var(--lichen);margin-top:4px}
+
+  /* counters */
+  .counters{display:flex;gap:6px;margin-top:auto}
+  .ctr{flex:1;text-align:center;border:1px solid rgba(239,234,224,.14);border-radius:2px;
+    padding:3px 2px;font-size:.6rem;letter-spacing:.04em;color:var(--chalk-dim);line-height:1.25}
+  .ctr b{display:block;font-size:1rem;color:var(--chalk);font-variant-numeric:tabular-nums}
+  .ctr.fa b{color:var(--lichen)}
+  .ctr.lives b{color:var(--str)}
+  .ctr.where{display:flex;align-items:center;justify-content:center;font-size:.66rem}
+
+  /* ---------- crag ---------- */
+  .cragwrap{background:
+      linear-gradient(180deg,rgba(60,78,86,.35),rgba(24,31,34,.15) 55%,rgba(24,31,34,0)),
+      var(--rock-dark);
+    border:1px solid rgba(239,234,224,.12);border-radius:3px;padding:18px 10px 0;overflow-x:auto}
+  .board{width:max-content;margin:0 auto}
+  .hexrow{display:flex;margin-top:calc(var(--hexH) * -0.25)}
+  .hexrow:first-child{margin-top:0}
+  .hexrow.odd{margin-left:calc(var(--hexW) / 2)}
+  .hexcell{width:var(--hexW);height:var(--hexH);position:relative}
+  .hex{position:absolute;inset:1px;
+    clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+    background:var(--rock-dark);display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:2px;text-align:center;padding:0 clamp(4px,1.8vw,12px);
+    border:0;cursor:default;transition:filter .15s,transform .12s}
+  .hex.hidden-hold{background:
+      repeating-linear-gradient(58deg,#20292D 0 7px,#1B2327 7px 14px);}
+  .hex.hidden-hold::after{content:"?";font-size:clamp(1rem,3.6vw,1.5rem);color:rgba(239,234,224,.3);font-weight:700}
+  .hex.revealed{background:linear-gradient(155deg,var(--rock-lit),var(--rock))}
+  .hex.rest{background:linear-gradient(155deg,#2F6158,#1B3A34)}
+  .hex.rest .hname{color:#B9E6DC}
+  .hex.crux{background:linear-gradient(155deg,#6B2A1E,#2C1310)}
+  .hex.crux .hname{color:#F3B9AA;letter-spacing:.06em}
+  .hex .reward{font-size:clamp(.8rem,2.6vw,1.05rem);font-weight:700;color:#7FE3CE;line-height:1}
+  .hex.reachable{cursor:pointer;filter:brightness(1.25)}
+  .hex.reachable:hover{transform:scale(1.04)}
+  .hex.reachable::before{content:"";position:absolute;inset:0;
+    clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+    box-shadow:0 0 0 3px var(--lichen) inset}
+  .hex.target::before{box-shadow:0 0 0 4px var(--chalk) inset}
+  .hex .hname{font-size:clamp(.53rem,1.95vw,.78rem);font-weight:700;line-height:1.05;letter-spacing:.02em}
+  .hex .reqs{display:flex;gap:clamp(3px,1vw,5px);font-size:clamp(.6rem,2.1vw,.82rem);font-weight:700}
+  .hex .reqs i{font-style:normal}
+  .reqs i.adj, .dr i.adj{background:rgba(156,176,78,.26);border-radius:2px;padding:0 3px}
+  .reqs i.lip, .dr i.lip{background:rgba(195,69,47,.34);border-radius:2px;padding:0 3px}
+  .boardnote{font-size:.76rem;color:var(--chalk-dim);text-align:center;padding:10px 6px 0;line-height:1.4}
+  .boardnote b{color:var(--chalk)}
+  .hex .reqs .s{color:var(--str)} .hex .reqs .e{color:var(--end)} .hex .reqs .t{color:var(--tec)}
+  .hex .tokens{display:flex;gap:2px;position:absolute;bottom:13%}
+  .tok{width:clamp(8px,2.4vw,12px);height:clamp(8px,2.4vw,12px);border-radius:50%;
+    background:var(--pc);border:1.5px solid rgba(0,0,0,.5)}
+  .ground{margin-top:calc(var(--hexH) * -0.16);padding:14px 0 16px;text-align:center;
+    border-top:1px dashed rgba(239,234,224,.25);color:var(--chalk-dim);font-size:.85rem}
+  .ground.reachable{cursor:pointer;color:var(--chalk)}
+  .gradeCol{display:flex;flex-direction:column;justify-content:space-around;
+    font-size:.75rem;color:var(--chalk-dim);padding-right:8px}
+
+  .flash{color:var(--lichen);font-style:normal;font-weight:600}
+  .deckgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px}
+  .dtile{display:flex;flex-direction:column;gap:4px;font-size:.8rem;
+    border:1px solid rgba(239,234,224,.12);border-radius:2px;padding:6px 8px}
+  .dtile .vb{margin-right:9px;white-space:nowrap}
+  .dtile .vb i{margin-right:1px}
+  .dtile.gone{opacity:.32}
+  .dtile.drest{border-color:rgba(62,142,140,.65);background:rgba(62,142,140,.10)}
+  .dtile.drest .dn{color:#9FD4D2}
+  .dtile.dcrux{border-color:rgba(195,69,47,.7);background:rgba(195,69,47,.12)}
+  .dtile.dcrux .dn{color:#F0B5A6}
+  .dtile .dn{color:var(--chalk);display:flex;justify-content:space-between;gap:8px}
+  .dtile .dr{font-weight:700;letter-spacing:.05em}
+  .dtile .dr i{font-style:normal}
+  .dtile .dr .s{color:var(--str)} .dtile .dr .e{color:var(--end)} .dtile .dr .t{color:var(--tec)}
+  .dtile .dc{color:var(--chalk-dim);font-variant-numeric:tabular-nums}
+  .dtotal{grid-column:1/-1;font-size:.8rem;color:var(--chalk-dim);padding-top:4px}
+
+  /* ---------- attempt / dice ---------- */
+  .targetbox{min-height:64px;font-size:.9rem;color:var(--chalk-dim);line-height:1.45}
+  .targetbox b{color:var(--chalk);font-size:1.05rem;display:block;margin-bottom:3px}
+  .dicerow{display:flex;gap:7px;margin:4px 0 12px}
+  .die{flex:1;aspect-ratio:1;border-radius:5px;background:#12181A;
+    border:1px solid rgba(239,234,224,.18);display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:2px;position:relative}
+  .die .face{font-size:1.75rem;font-weight:700;line-height:1}
+  .die .lab{font-size:.62rem;letter-spacing:.06em;color:var(--chalk-dim);text-align:center}
+  .die.s{border-bottom:3px solid var(--str)} .die.e{border-bottom:3px solid var(--end)}
+  .die.t{border-bottom:3px solid var(--tec)}
+  .die.c{border-bottom:3px solid rgba(239,234,224,.45);background:#101517}
+  .die .face.cond{font-size:1.5rem}
+  .die.rolling{animation:shake .12s infinite}
+  @keyframes shake{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(1px,-2px) rotate(-2deg)}100%{transform:translate(-1px,1px) rotate(2deg)}}
+  .die .wat{color:var(--end)} .die .chalkface{color:var(--chalk)}
+  .die.bumpable{cursor:pointer;box-shadow:0 0 0 2px var(--lichen) inset}
+  .die.bumpable:hover{background:#1A2225}
+  .die.bumped::after{content:"+1";position:absolute;top:5px;right:6px;
+    font-size:.66rem;font-weight:700;color:var(--lichen)}
+  .ledger{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+  .chip{font-size:.7rem;padding:2px 7px;border-radius:2px;border:1px solid rgba(239,234,224,.18);
+    color:var(--chalk-dim);white-space:nowrap}
+  .chip b{font-variant-numeric:tabular-nums;margin-left:2px}
+  .chip.down{border-color:rgba(195,69,47,.55);background:rgba(195,69,47,.13);color:#F0B5A6}
+  .chip.up{border-color:rgba(62,142,140,.6);background:rgba(62,142,140,.14);color:#9FD4D2}
+  .chip.flat{opacity:.75}
+  .chip.total{font-weight:700;color:var(--chalk);border-color:rgba(239,234,224,.4)}
+  .delta{font-size:.74rem;font-weight:700;padding:0 4px;border-radius:2px;margin-right:auto}
+  .delta.down{color:#F0B5A6;background:rgba(195,69,47,.22)}
+  .delta.up{color:#9FD4D2;background:rgba(62,142,140,.22)}
+
+  .verdict{font-family:'Spectral',Georgia,serif;font-size:.95rem;line-height:1.5;
+    border-left:2px solid var(--lichen);padding-left:10px;margin-bottom:10px;min-height:1.4em}
+  .breakdown{display:flex;gap:6px;font-size:.78rem;margin-bottom:10px}
+  .breakdown div{flex:1;text-align:center;border:1px solid rgba(239,234,224,.14);padding:3px 0;border-radius:2px}
+  .breakdown div.short{border-color:var(--str);background:rgba(195,69,47,.16)}
+  .breakdown div.waived{border-color:var(--lichen);background:rgba(156,176,78,.18);font-size:.68rem}
+  button.primary.alt{background:transparent;color:var(--chalk);border-color:var(--str)}
+  button.primary.alt:hover:not(:disabled){background:rgba(195,69,47,.2);border-color:var(--str)}
+  .log{font-size:.85rem;line-height:1.5;max-height:320px;overflow-y:auto;color:var(--chalk-dim)}
+  .log p{margin:0 0 6px;padding-bottom:6px;border-bottom:1px solid rgba(239,234,224,.07)}
+  .log p b{color:var(--chalk)}
+  .log p.entry{display:flex;flex-direction:column;gap:2px;padding:7px 8px;margin-bottom:7px;
+    background:rgba(239,234,224,.035);border-left:2px solid rgba(239,234,224,.22);border-bottom:0}
+  .ehead{font-size:.84rem;color:var(--chalk-dim)}
+  .ehead b{font-size:.9rem}
+  .ehead em{font-style:normal;color:var(--lichen);font-size:.76rem}
+  .eline{font-size:.78rem}
+  .eline i{font-style:normal;font-weight:700}
+  .eline s{text-decoration:none;opacity:.35;margin:0 1px}
+  .eabil{color:var(--lichen)}
+  .eblind{color:#9FD4D2}
+  .emoney{font-variant-numeric:tabular-nums}
+  .eout{color:var(--chalk);font-weight:600;font-size:.78rem}
+
+  details{font-size:.86rem;line-height:1.55;color:var(--chalk-dim)}
+  details summary{cursor:pointer;color:var(--chalk);font-weight:600;margin-bottom:8px}
+  details ul{padding-left:18px;margin:6px 0}
+  details li{margin-bottom:5px}
+  .legend{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:.82rem;align-items:center}
+  .legend b{font-size:1.05rem}
+
+  /* ---------- tablet ---------- */
+  @media (max-width:1100px){
+    .grid{grid-template-columns:1fr}
+    .col-crag{order:1}
+    .col-attempt{order:2}
+    .matband{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+
+  /* ---------- phone ---------- */
+  @media (max-width:640px){
+    .shell{padding:12px 10px 40px}
+    header.top{gap:10px 14px;padding-bottom:10px;margin-bottom:14px}
+    .wordmark{font-size:1.75rem}
+    .routeline{font-size:.9rem}
+    .toolbar{margin-left:0;width:100%}
+    .toolbar button{flex:1;min-height:44px}
+    .grid{gap:14px}
+    .cragwrap{padding:12px 4px 0;overflow-x:hidden}
+    .gradeCol{font-size:.68rem;padding-right:4px}
+    .panel{padding:12px 11px}
+    .panel + .panel{margin-top:12px}
+    .matband{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:14px}
+    .mat{padding:9px 9px 8px;gap:6px}
+    .mat .role{display:none}
+    .cardslot{min-height:0}
+    .ctext{font-size:.68rem}
+    .die .face{font-size:1.3rem}
+    .die .lab{font-size:.55rem;letter-spacing:.02em}
+    .dicerow{gap:5px}
+    .log{max-height:150px}
+    .ground{font-size:.8rem;padding:10px 0 12px}
+    /* keep the roll button within thumb reach while the board is on screen */
+    .rollbar{position:sticky;bottom:0;z-index:5;padding:10px 0 4px;
+      background:linear-gradient(180deg,rgba(24,31,34,0),rgba(24,31,34,.95) 40%)}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="top">
+    <div>
+      <div class="wordmark">Send <span>It</span></div>
+      <div class="routeline">a blind ascent, one hold at a time</div>
+    </div>
+    <div class="toolbar">
+      <label class="pick">Table <select id="selTable"></select></label>
+      <label class="pick">Route <select id="selMap"></select></label>
+      <label class="pick">You climb as <select id="selChar"></select></label>
+      <label class="pick">Your ability <select id="selAbil"></select></label>
+      <button id="btnRaw">Show what you need</button>
+      <button id="btnNew">New crag</button>
+      <button id="btnRevealAll">Peek at the topo</button>
+    </div>
+  </header>
+
+  <!-- ============ the four climbers, always on screen ============ -->
+  <div id="mats" class="matband"></div>
+
+  <div class="grid">
+
+    <!-- ============ LEFT: the crag ============ -->
+    <div class="col-crag">
+      <div class="cragwrap">
+        <div style="display:flex;gap:4px;justify-content:center">
+          <div class="gradeCol" id="grades"></div>
+          <div class="board" id="board"></div>
+        </div>
+        <div class="boardnote" id="boardnote"></div>
+        <div class="ground" id="ground">the ground — start here</div>
+      </div>
+      <div class="panel">
+        <details>
+          <summary>Tiles still face down</summary>
+          <div class="deckgrid" id="deckgrid"></div>
+        </details>
+      </div>
+    </div>
+
+    <!-- ============ RIGHT: attempt ============ -->
+    <div class="col-attempt" id="colAttempt">
+      <div class="panel">
+        <h3 id="turnLabel">Turn</h3>
+        <div class="targetbox" id="targetbox">Pick a hold to try for.</div>
+        <div class="dicerow">
+          <div class="die s"><div class="face" id="f0">–</div><div class="lab">strength</div></div>
+          <div class="die e"><div class="face" id="f1">–</div><div class="lab">endurance</div></div>
+          <div class="die t"><div class="face" id="f2">–</div><div class="lab">technique</div></div>
+          <div class="die c"><div class="face" id="f3">–</div><div class="lab">conditions</div></div>
+        </div>
+        <div class="breakdown" id="breakdown" hidden></div>
+        <div class="ledger" id="ledger" hidden></div>
+        <div class="verdict" id="verdict"></div>
+        <div class="rollbar"><div class="btnrow">
+          <button class="primary" id="btnRoll" disabled>Roll for the hold</button>
+          <button class="primary alt" id="btnBail" hidden>Back off</button>
+          <button class="primary alt" id="btnDeclare" hidden>Call the onsight</button>
+          <button class="primary alt" id="btnScout" hidden>Scout a hold</button>
+          <button class="primary alt" id="btnPass" hidden>Chalk up, regain 1</button>
+        </div></div>
+      </div>
+
+      <div class="panel">
+        <h3>Move log</h3>
+        <div class="log" id="log"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Dice faces</h3>
+        <div class="legend">
+          <b>0</b><span>one face: nothing, even an easy hold can spit you off</span>
+          <b>1</b><span>two faces</span>
+          <b>2</b><span>two faces</span>
+          <b>3</b><span>one face</span>
+          <b style="color:var(--lichen)">+1</b><span>conditions: raise one category by 1</span>
+          <b style="color:var(--str)">&minus;1</b><span>conditions: lower the hold's HARDEST category by 1. Two faces</span>
+          <b style="color:var(--end)">&#9670;</b><span>conditions: a drink, 1 drop back. Two faces</span>
+          <b style="color:var(--str)">&#10005;</b><span>conditions: a slip, 1 drop gone</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <details>
+          <summary>How this prototype resolves a move</summary>
+          <ul>
+            <li>Your character card carries a fixed stat line. Your ability is dealt at random from a pool of twelve at the start of the route, so the same climber plays differently each game. Abilities are marked ALWAYS, PER ATTEMPT or PER ROUTE.</li>
+            <li>The tiles come in sets of 15, and every route is a whole number of sets: 15, 30 or 45 holds. So the mix of hold types is identical in every game, one rest ledge per set, and the tank grows with the route.</li>
+            <li>The crag is one shuffled deck, dealt face down at random. No difficulty gradient, no guaranteed rest ledge.</li>
+            <li>What remains hidden is public knowledge, since the deck is fixed. You can count what is left, but never where it is.</li>
+            <li>Once a climber has topped out, everyone else gets one last turn. On that turn only, anyone two or more rows below the summit may lunge, attempting a hold two rows straight up for the row toll plus 1 drop. So from row 3 you still have a shot at the top, and from row 2 you are genuinely out of it.</li>
+            <li>Move up into either hold above you, or sideways along your row. No downclimbing. One climber per hold, except the rest ledge and except a Poacher, who can take an occupied hold and swap places with the climber on it.</li>
+            <li>Rows 1 and 2 are free to reach for. From row 3 up, every attempt costs 1 drop before the dice, win or lose. If that drop alone would empty you, the hold is out of reach and you must rest first.</li>
+            <li>Then roll. Three category dice, each showing 0, 1, 1, 2, 2, 3, plus one condition die rolled with them. A face-down hold turns over after the roll, and one point of shortfall is forgiven for climbing blind.</li>
+            <li>The condition die has six faces: +1, &minus;1, &minus;1, drop, drop, slip. Both act on ONE category, never on your total. The +1 goes where you are furthest short, your choice. The &minus;1 is not your choice: it lands on the category the hold demands MOST, the crux of the move, so you only escape it if you happened to overshoot there. A drop returns 1 water, a slip costs 1.</li>
+            <li>A requirement of 3 needs a rolled 3, or a 2 with a +1. Chalk counts as a flat 2 and ignores your modifiers. A -1 in a category makes a 3 there impossible to match, so you will always pay something on those holds.</li>
+            <li>Each hold type comes in several versions with different numbers, keeping one signature category fixed. A flat edge might be 2/1/1, 1/2/1 or 1/1/2, so the name tells you the family, never the exact demand.</li>
+            <li>The deck demands each category about equally, 40/42/42 in total, and most holds need 2 or more in at least two categories. A single buff cannot clear a hold on its own. A 0 means that category is free on that tile.</li>
+            <li>Character boosts add 1 to a category, after the hold is face up, once per attempt.</li>
+            <li>Missing 3 or more and there is no way back down. You fight for it and pay a drop per point missing, and if you do not have the drops you come off and fall 2 rows. So the moment you reach for a hold you are accepting that risk, whatever your water.</li>
+            <li>Missing 1 or 2 you still have a choice. Take the hold and pay a drop per point, or back off for 1 drop and stay where you are.</li>
+            <li>Matched everything: take it free. Short by any amount: pay 1 drop per point to force the move, or pay 1 drop to back off and stay where you are. The hold stays face up either way.</li>
+            <li>A rest ledge returns 2 drops when you establish it. Chalking up on your turn instead of climbing returns 1, or 2 if nothing above you is free.</li>
+            <li>Drops leave you in exactly four places: the row toll before the dice, a slip on the condition die, forcing a move you came up short on, and backing off. Rows 1 and 2 have no toll at all.</li>
+            <li>Running out of water is the ONLY way to come off the wall. It can happen from the height toll, from forcing a move, or from backing off. Water symbols are counted first, so they can save you.</li>
+            <li>When you empty your water you drop 2 rows, landing on that hold in your column and turning it face up, then refill to full. Below row 3 that means the ground. If the landing hold is taken you drop another row.</li>
+            <li>Play solo against the route with 3 lives, or with up to four climbers sharing one screen, any mix of people and CPU. Pass the device when the panel tells you to.</li>
+            <li>Climbers race the same crag. Who leads is random each route. Climbers later in the order may start with extra drops above their ceiling, tuned per route, because turn order is worth different amounts on a short boulder problem and on a big wall.</li>
+            <li>That head start sits ABOVE your ceiling. The mat has 8 drop counters, but only the first 5 can ever be recovered, marked by the red line. Spend the extras and they are gone, and a pump-out refills you to 5 like everyone else.</li>
+            <li>With four on the wall you will get blocked. If nothing above you is free, resting recovers 2 drops instead of 1, so waiting out the traffic builds you a bigger tank.</li>
+            <li>When a climber tops out, everyone else gets one last turn to match it. If more than one tops out, most water left wins, then most first ascents.</li>
+          </ul>
+        </details>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATA
+   ============================================================ */
+/* The tile deck: a set of 15. Every route is built from whole sets, so the mix
+   is identical in every game. Perfectly level: demand 27/27/27, cost 10.50 each,
+   five threes in each category, one rest ledge and one crux per set. */
+const HOLD_TYPES = [
+  {n:'Rest ledge', tier:0, rest:2, f:'Shake out here and drink. Free to hold.',
+   variants:[[0,0,0]]},
+  {n:'Jug',        tier:0, f:'Positive and deep. Everyone gets it.',
+   variants:[[1,1,1],[1,1,1]]},
+  {n:'Flat edge',  tier:0, f:'Honest, square cut, no surprises.',
+   variants:[[2,1,1]]},
+  {n:'Undercling', tier:1, f:'Feet high, tension on, and hold it.',
+   variants:[[1,3,1]]},
+  {n:'Side pull',  tier:1, f:'Needs body tension to stay on.',
+   variants:[[2,2,2]]},
+  {n:'Gaston',     tier:1, f:'Elbow out, hips in. All body position.',
+   variants:[[1,2,3]]},
+  {n:'Two finger pocket', tier:1, f:'Two fingers take the whole load.',
+   variants:[[3,1,2]]},
+  {n:'Volume',     tier:1, f:'Nothing to hold, everything to balance.',
+   variants:[[2,1,3]]},
+  {n:'Crimp',      tier:2, f:'Small, sharp, and over quickly.',
+   variants:[[3,2,1],[3,1,3]]},
+  {n:'Sloper',     tier:2, f:'Friction, patience, faith.',
+   variants:[[1,3,2],[1,3,3]]},
+  {n:'Pinch',      tier:2, f:'All thumb, all forearm, no relief.',
+   variants:[[3,3,1]]},
+  {n:'The Crux', tier:3, crux:true, f:'The hardest move on the route. Everything at once.',
+   variants:[[3,3,3]]}
+];
+const SETSIZE = 15;
+
+/* Characters carry the static stat line only. Ability cards are dealt separately.
+   Each line nets +1 across the three categories. */
+const CHARS = [
+  {n:'Boulderer',     r:'all power, no patience',            S:2,E:-1,T:0, water:5, c:'#C3452F'},
+  {n:'Sport climber', r:'trained for the redpoint',          S:0,E:2,T:-1, water:5, c:'#3E8E8C'},
+  {n:'Alpinist',      r:'moves all day, cannot pull hard',   S:-1,E:1,T:1, water:5, c:'#8C7BB0'},
+  {n:'Trad climber',  r:'precise feet, careful head',        S:-1,E:0,T:2, water:5, c:'#D9A227'}
+];
+
+const TRACK = 8;   // drop counters printed on the mat: 5 recoverable, 3 for a head start
+
+/* The ability pool. One is dealt to each climber at the start of the route.
+   Timing bands: ALWAYS = passive, PER ATTEMPT = every roll, PER ROUTE = limited charges. */
+const ABILITIES = [
+  {id:'arete',   n:'Arête Specialist', charges:3, band:'per route',
+   t:'Three times per route, on the outer columns only, add 1 to any category after the roll.'},
+  {id:'beta',    n:'Beta Reader', band:'per attempt',
+   t:'Once per attempt, reroll one die that came up short.'},
+  {id:'dynamic', n:'Dynamic Mover', band:'always',
+   t:'When you are short by exactly 1, force the move for free.'},
+  {id:'efficient', n:'Efficient', band:'always',
+   t:'Backing off an attempt costs you nothing.'},
+  {id:'traverse', n:'Traverser', band:'always',
+   t:'Sideways moves along your row pay no height toll.'},
+  {id:'poach',   n:'Poacher', band:'always',
+   t:'You may attempt a hold another climber is on. Establish it and you swap places with them.'},
+  {id:'guide',   n:'Guidebook', band:'always',
+   t:'Once per turn, turn one face-down hold next to you face up. Everyone sees it, and it is no longer blind for you either.'},
+  {id:'lungs',   n:'Deep Lungs', band:'per route',
+   t:'The first water symbol you roll on each row returns 1 extra drop. Five rows, five chances.'},
+  {id:'grip',    n:'Iron Grip', charges:1, band:'per route',
+   t:'Once per route, pay no height toll to reach for a hold.'},
+  {id:'static',  n:'Static Master', charges:1, band:'per route',
+   t:'Once per route, treat one category as automatically matched.'},
+  {id:'reach',   n:'Long Reach', charges:1, band:'per route',
+   t:'Once per route, attempt ANY hold two hexes away, sideways or up, not down. Costs the row toll plus 1 drop.'},
+  {id:'onsight', n:'Onsighter', charges:1, band:'per route',
+   t:'Once per route, declare an onsight before rolling on a blind hold. Establish it clean and gain 2 drops. Come up short and lose 2.'}
+];
+
+/* Three category dice, one each for strength, endurance and technique.
+   Plain numbers only: a zero, two 1s, two 2s and a 3. */
+const FACES = [{v:0},{v:1},{v:1},{v:2},{v:2},{v:3}];
+
+/* One extra condition die, rolled with them. Applies to the attempt as a whole. */
+const COND = [
+  {k:'plus',  g:'+1'},
+  {k:'minus', g:'\u22121'},
+  {k:'minus', g:'\u22121'},
+  {k:'drop',  g:'\u25C6'},
+  {k:'drop',  g:'\u25C6'},
+  {k:'slip',  g:'\u2715'}
+];
+function condStory(ev){
+  if(!ev.cond) return '';
+  const who = ev.condTarget!==null ? STATNAMES[ev.condTarget] : null;
+  switch(ev.cond){
+    case 'plus':  return who ? `good conditions, +1 to ${who}` : 'good conditions, nothing to fix';
+    case 'minus': return who
+      ? (ev.condAbsorbed
+          ? `bad conditions on the crux, \u22121 off ${who}, and you had it to spare`
+          : `bad conditions on the crux, \u22121 off ${who}`)
+      : 'bad conditions, nothing left to take';
+    case 'drop':  return 'a drink, 1 drop back';
+    case 'slip':  return 'a slip, 1 drop gone';
+  }
+  return '';
+}
+const poolFor = i => (i===3 ? COND : FACES);
+
+/* Routes. Everything scales off rows and columns: the deck is built to fit,
+   the toll starts above the second row, and the tank grows with the route. */
+const MAPS = [
+  {n:'Boulder problem', rows:3, cols:5,  tank:4, seats:[0,0,1,2], blurb:'one set, short and vicious'},
+  {n:'The Pillar',      rows:5, cols:3,  tank:4, seats:[0,1,2,3], blurb:'one set, narrow, everyone in each other way'},
+  {n:'Sport route',     rows:6, cols:5,  tank:5, seats:[0,0,1,2], blurb:'two sets, the standard crag'},
+  {n:'Traverse',        rows:3, cols:10, tank:5, seats:[0,0,0,0], blurb:'two sets, wide and low, sideways matters'},
+  {n:'The Chimney',     rows:10, cols:3, tank:6, seats:[0,1,2,3], blurb:'two sets, tall and narrow, a permanent traffic jam'},
+  {n:'Big wall',        rows:9, cols:5,  tank:7, seats:[0,0,1,1], blurb:'three sets, a long war of attrition'}
+];
+let mapIdx = 2;
+
+/* who is at the table */
+const TABLES = [
+  {n:'Solo, 3 lives',      humans:1, bots:0, lives:3},
+  {n:'You + 3 CPU',        humans:1, bots:3, lives:0},
+  {n:'2 players + 2 CPU',  humans:2, bots:2, lives:0},
+  {n:'3 players + 1 CPU',  humans:3, bots:1, lives:0},
+  {n:'4 players',          humans:4, bots:0, lives:0}
+];
+let tableIdx = 1;
+let lives = 0, defeated = false, viewIdx = 0;
+let ROWS = MAPS[mapIdx].rows, COLS = MAPS[mapIdx].cols;
+const GRADESCALE = ['5','5+','6a','6a+','6b','6b+','6c','6c+','7a','7a+','7b','7b+','7c','8a'];
+function grades(){                     // bottom to top, display only
+  const out = [];
+  for(let r=0;r<ROWS;r++) out.push(GRADESCALE[Math.min(GRADESCALE.length-1, Math.round(r*(GRADESCALE.length-1)/Math.max(1,ROWS-1)))]);
+  return out;
+}
+
+/* All the tuning lives here */
+const RULES = {
+  failCost: 1,       // drops to back off an attempt you do not want to pay for
+  fallRows: 2,       // how many rows you drop when you pump out
+  reachToll: 1,      // extra drop for skipping a hold with Long Reach
+  commitAt: 3,       // missing this much or more and there is no backing off: pay it or come off
+  lipBonus: 0,       // set to 1 to make the top row demand one more in its hardest category
+  exposure(r){ return r >= 2 ? 1 : 0; }   // the bottom two rows are free, everything above costs 1
+};
+
+/* Topping out is harder than the climbing below it.
+   On the top row the hold's hardest category demands one more point. */
+function effReqs(hold,r){
+  const q = [hold.S, hold.E, hold.T];
+  if(r === ROWS-1 && RULES.lipBonus){
+    let k = 0;
+    for(let i=1;i<3;i++) if(q[i] > q[k]) k = i;
+    q[k] += RULES.lipBonus;
+  }
+  return q;
+}
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let board = [], players = [], cur = 0, target = null, rolling = false;
+let gen = 0;   // bumped on every new route, so stale timers do nothing
+
+function later(fn, ms){
+  const g0 = gen;
+  setTimeout(()=>{ if(gen === g0) fn(); }, ms);
+}
+let phase = 'select';   // select | decide | busy
+let pending = null;     // dice faces waiting to be resolved
+let boostUsed = false;   // power bump spent on this attempt
+let attemptBlind = false; // was the target face down when chosen
+let lastEval = null;    // running evaluation of the dice on the table
+let boosts = [0,0,0];   // +1s added to each category this attempt
+let freeCats = [false,false,false];   // categories waived by Static Master
+let scoutMode = false;  // Guidebook: waiting for a hold to turn over
+let scoutedTurn = false;
+let ledger = [];        // itemised drops in and out for this attempt
+let startWater = 0;     // water before the attempt began
+let attemptInfo = null; // what happened this attempt, for the log
+let gameOver = false;
+let humanChar = 0;      // index into CHARS
+let humanAbil = '';     // '' means deal at random
+let attemptReach = false;  // is this attempt a Long Reach skip
+let onsightDeclared = false;
+let finalRound = false;    // someone topped out, everyone else gets one last turn
+let winner = null;
+let showRaw = true;    // true = show the numbers printed on the holds
+
+const sameCell = (a,b)=> a && b && a.r===b.r && a.c===b.c;
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+let deckCount = {};   // how many of each type this route contains
+
+function buildDeck(){
+  const base = [];
+  HOLD_TYPES.forEach(t=>t.variants.forEach(v=>base.push({
+    n:t.n, S:v[0], E:v[1], T:v[2], tier:t.tier, rest:t.rest, crux:t.crux, f:t.f
+  })));
+  const need = ROWS * COLS;
+  const deck = [];
+  while(deck.length < need){                  /* repeat the set, keeping the proportions */
+    shuffle(base).forEach(tile=>{ if(deck.length < need) deck.push(tile); });
+  }
+  deckCount = {};
+  deck.forEach(t=>{ deckCount[t.n] = (deckCount[t.n]||0) + 1; });
+  return deck;
+}
+
+/* Shuffle all 25 tiles and deal them blind across the whole crag.
+   No difficulty gradient, no reserved rest ledges. Where the holds fall is luck,
+   and the escalation comes from the water economy instead: exposure cost and fall damage. */
+function layoutCrag(){
+  const deck = shuffle(buildDeck());
+  board = [];
+  let i = 0;
+  for(let r=0;r<ROWS;r++){
+    const row = [];
+    for(let c=0;c<COLS;c++) row.push({hold:deck[i++], up:false});
+    board.push(row);
+  }
+}
+
+function makePlayer(ch,ability,isBot){
+  const tank = MAPS[mapIdx].tank;
+  return {ch, ability, charges:ability.charges||0, isBot, delta:null,
+          areteHolds:new Set(), lungRows:new Set(),
+          water:tank, max:tank, seatBonus:0,
+          pos:null, fas:0, falls:0, topped:false, finalDone:false};
+}
+
+function newCrag(){
+  gen++;                       /* anything still in flight from the last route is now void */
+  rolling = false;
+  ROWS = MAPS[mapIdx].rows;
+  COLS = MAPS[mapIdx].cols;
+  if(document.documentElement && document.documentElement.style)
+    document.documentElement.style.setProperty('--hexW',
+      `min(86px, calc((100vw - 90px) / ${COLS + 0.5}))`);
+  layoutCrag();
+  /* deal characters and abilities to everyone at the table */
+  const T = TABLES[tableIdx];
+  const seatsTotal = T.humans + T.bots;
+  const others = shuffle(CHARS.map((_,i)=>i).filter(i=>i!==humanChar));
+  const pool = shuffle(ABILITIES.slice());
+  const mine = humanAbil ? ABILITIES.find(a=>a.id===humanAbil) : pool[0];
+  const rest = pool.filter(a=>a.id!==mine.id);
+  players = [ makePlayer(CHARS[humanChar], mine, false) ];
+  for(let k=1;k<seatsTotal;k++)
+    players.push(makePlayer(CHARS[others[(k-1) % others.length]], rest[k-1], k >= T.humans));
+  lives = T.lives; defeated = false; viewIdx = 0;
+  cur = Math.random() * players.length | 0;   /* who leads is random */
+  players.forEach((pl,i)=>{
+    if(players.length < 2) return;
+    const seat = (i - cur + players.length) % players.length;
+    if(seat > 0){
+      /* a head start you can spend but never recover: the ceiling stays 5 for everyone.
+         Measured over 20000 races, this holds every seat within 4 points of 25%. */
+      pl.seatBonus = (MAPS[mapIdx].seats || [0,1,2,3])[seat] || 0;
+      pl.water = pl.max + seat;
+    }
+  });
+  target = null; pending = null; phase = 'select';
+  boostUsed = false; attemptBlind = false; lastEval = null; boosts = [0,0,0];
+  freeCats = [false,false,false]; scoutMode = false; scoutedTurn = false;
+  attemptReach = false; onsightDeclared = false;
+  gameOver = false; finalRound = false; winner = null;
+  document.getElementById('log').innerHTML = '';
+  const order = players.map((pl,i)=>({pl, seat:(i-cur+players.length)%players.length}))
+    .sort((a,b)=>a.seat-b.seat).map(o=>o.pl.ch.n).join(', then ');
+  say(`<b>${MAPS[mapIdx].n}</b>, ${COLS} by ${ROWS}. You are <b>${players[0].ch.n}</b> with <b>${players[0].ability.n}</b>.`);
+  say(`Four on the route. Order: ${order}. Climbers later in the order start with a fuller tank.`);
+  drawAll(); resetDice();
+  if(players[cur].isBot) later(botTurn, 800);
+}
+
+/* ============================================================
+   RULES HELPERS
+   ============================================================ */
+function occupant(r,c,except){
+  return players.find(p=>p!==except && sameCell(p.pos,{r,c}));
+}
+/* One climber per hold. The rest ledge is shareable, and a Poacher ignores the rule. */
+function canEnter(p,r,c){
+  const o = occupant(r,c,p);
+  if(!o) return true;
+  const cell = board[r][c];
+  if(cell.up && cell.hold.rest) return true;
+  return p.ability.id==='poach' && !!p.pos;   /* you need a hold to swap them onto */
+}
+/* every hex touching this one, up and down */
+function adj(r,c){
+  const out=[];
+  if(c>0) out.push({r,c:c-1});
+  if(c<COLS-1) out.push({r,c:c+1});
+  const off = (r%2===0) ? [c-1,c] : [c,c+1];
+  if(r<ROWS-1) off.forEach(cc=>{ if(cc>=0&&cc<COLS) out.push({r:r+1,c:cc}); });
+  if(r>0)      off.forEach(cc=>{ if(cc>=0&&cc<COLS) out.push({r:r-1,c:cc}); });
+  return out;
+}
+const key = (r,c)=>r+','+c;
+
+/* hexes exactly two steps away, never below you */
+function reachRing(pos){
+  const near = new Set([key(pos.r,pos.c)]);
+  adj(pos.r,pos.c).forEach(n=>near.add(key(n.r,n.c)));
+  const out = [];
+  adj(pos.r,pos.c).forEach(n=>adj(n.r,n.c).forEach(m=>{
+    if(near.has(key(m.r,m.c))) return;
+    if(m.r < pos.r) return;                       /* no downclimbing */
+    if(out.some(o=>o.r===m.r && o.c===m.c)) return;
+    out.push(m);
+  }));
+  return out;
+}
+
+/* how far behind the leader this climber is */
+function behindBy(p){
+  const lead = Math.max(...players.map(x=>x.pos ? x.pos.r : -1));
+  return lead - (p.pos ? p.pos.r : -1);
+}
+
+/* a span is any move of two hexes. Two ways to earn one. */
+function spanKind(p,r,c){
+  if(!p.pos) return null;
+  const straightUp2 = (r === p.pos.r + 2 && c === p.pos.c);
+  if(finalRound && behindBy(p) >= 2 && straightUp2) return 'desperate';
+  if(p.ability.id === 'reach' && p.charges > 0 &&
+     reachRing(p.pos).some(m=>m.r===r && m.c===c)) return 'card';
+  return null;
+}
+
+function neighbours(p){
+  if(!p.pos) return board[0].map((_,c)=>({r:0,c}));
+  const {r,c} = p.pos, out = [];
+  if(c>0) out.push({r,c:c-1});
+  if(c<COLS-1) out.push({r,c:c+1});
+  if(r<ROWS-1){
+    const a = (r%2===0) ? [c-1,c] : [c,c+1];   // two holds above, offset rows
+    a.forEach(cc=>{ if(cc>=0 && cc<COLS) out.push({r:r+1,c:cc}); });
+  }
+  if(finalRound && behindBy(p) >= 2 && r+2 < ROWS) out.push({r:r+2, c});   /* last-turn lunge */
+  if(p.ability.id === 'reach' && p.charges > 0)                    /* Long Reach card */
+    reachRing(p.pos).forEach(m=>{ if(!out.some(o=>o.r===m.r&&o.c===m.c)) out.push(m); });
+  return out;
+}
+/* you cannot reach for a hold if the height toll alone would empty you */
+/* can a falling climber land here? */
+function canLand(p,r,c){
+  const o = occupant(r,c,p);
+  if(!o) return true;
+  const cell = board[r][c];
+  return !!(cell.up && cell.hold.rest);
+}
+
+/* what this climber actually pays to reach for a given hold */
+function attemptCost(p,r,c){
+  let t = RULES.exposure(r);
+  if(spanKind(p,r,c)) t += RULES.reachToll;   /* a span skips a hold, so it costs one more */
+  if(!t) return 0;
+  if(p.ability.id==='traverse' && p.pos && r===p.pos.r) return 0;   /* sideways is free */
+  if(p.ability.id==='grip' && p.charges>0) return 0;                /* iron grip absorbs it */
+  return t;
+}
+
+/* you cannot reach for a hold if the toll alone would empty you */
+function legalMoves(p){
+  return neighbours(p).filter(n=>canEnter(p,n.r,n.c) && p.water > attemptCost(p,n.r,n.c));
+}
+
+function isReachable(r,c){
+  const p = players[cur];
+  if(gameOver || p.topped || p.isBot || rolling || phase!=='select') return false;
+  return legalMoves(p).some(n=>n.r===r && n.c===c);
+}
+
+/* Character modifiers only. The arête bonus is now an action, not a passive. */
+function effMods(p){
+  return [p.ch.S, p.ch.E, p.ch.T];
+}
+const onArete = c => c===0 || c===COLS-1;
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function drawAll(){ drawBoard(); drawMats(); drawTurn(); drawDeck(); drawNote(); }
+
+/* The deck is public knowledge, so show what is still hidden */
+function hiddenTiles(){
+  const rem = [];
+  board.forEach(row=>row.forEach(cell=>{ if(!cell.up) rem.push(cell.hold); }));
+  return rem;
+}
+
+function drawNote(){
+  const you = viewer();
+  const m = [you.ch.S, you.ch.E, you.ch.T];
+  const spread = m.map(v=>(v>0?'+':'')+v).join(' / ');
+  const M = MAPS[mapIdx];
+  document.getElementById('boardnote').innerHTML =
+    `<b>${M.n}</b>, ${M.cols} wide by ${M.rows} high, ${M.rows*M.cols} holds, tank of ${M.tank}. ${M.blurb}.<br>` + (showRaw
+    ? `Board shows the numbers printed on the holds, so a hard hold looks hard. Your ${spread} stat line is applied to the hold you select and to the dice, not to the whole crag.`
+    : `Showing what <b>you</b> need to roll everywhere, with your ${spread} stat line applied. Green numbers are eased by your stats.`)
+    + (RULES.lipBonus ? ` Red numbers on the top row are the lip: its hardest category demands one more.` : '');
+}
+
+function drawDeck(){
+  const rem = hiddenTiles();
+  const left = new Map();
+  rem.forEach(h=>left.set(h.n, (left.get(h.n)||0)+1));
+  document.getElementById('deckgrid').innerHTML = HOLD_TYPES.map(t=>{
+    const n = left.get(t.n) || 0;
+    const blocks = t.variants
+      .map(v=>`<span class="vb">${reqCells({S:v[0],E:v[1],T:v[2]})}</span>`).join('');
+    return `<div class="dtile ${n?'':'gone'}${t.rest?' drest':''}${t.crux?' dcrux':''}">
+      <span class="dn">${t.n}<span class="dc">${n} of ${deckCount[t.n]||0} hidden</span></span>
+      <span class="dr">${blocks}</span>
+    </div>`;
+  }).join('') + `<div class="dtotal">${rem.length} of ${ROWS*COLS} tiles still hidden. Each type comes in different versions, so the name never tells you the numbers.</div>`;
+}
+
+/* The three numbers on a hold, either raw or adjusted to what you must roll */
+function viewer(){
+  if(players[cur] && !players[cur].isBot){ viewIdx = cur; return players[cur]; }
+  return players[viewIdx] || players[0];
+}
+
+function reqCells(hold,r,mine){
+  const you = viewer();
+  const mods = effMods(you);
+  const raw = [hold.S, hold.E, hold.T];
+  const reqs = (r===undefined) ? raw : effReqs(hold,r);
+  const adjust = mine || !showRaw;      /* mine = the hold you are on the point of trying */
+  return reqs.map((q,i)=>{
+    const need = Math.max(0, q - mods[i]);
+    let cls = ['s','e','t'][i];
+    if(adjust && need!==q) cls += ' adj';
+    if(q > raw[i]) cls += ' lip';
+    return `<i class="${cls}">${adjust ? need : q}</i>`;
+  }).join('');
+}
+
+function drawBoard(){
+  const b = document.getElementById('board');
+  const myTurn = !players[cur].isBot && !gameOver;
+  b.innerHTML = '';
+  document.getElementById('grades').innerHTML =
+    grades().reverse().map(g=>`<div>${g}</div>`).join('');
+
+  for(let r=ROWS-1;r>=0;r--){
+    const row = document.createElement('div');
+    row.className = 'hexrow' + (r%2 ? ' odd' : '');
+    for(let c=0;c<COLS;c++){
+      const cell = board[r][c];
+      const wrap = document.createElement('div');
+      wrap.className = 'hexcell';
+      const h = document.createElement('button');
+      const scoutable = scoutMode && !cell.up && myTurn
+        && neighbours(players[cur]).some(n=>n.r===r && n.c===c);
+      const reach = isReachable(r,c) || scoutable;
+      h.className = 'hex ' + (cell.up ? 'revealed' : 'hidden-hold')
+        + (cell.up && cell.hold.rest ? ' rest' : '')
+        + (cell.up && cell.hold.crux ? ' crux' : '')
+        + (reach ? ' reachable' : '') + (sameCell(target,{r,c}) ? ' target' : '');
+      h.disabled = !reach;
+      h.setAttribute('aria-label', cell.up ? cell.hold.n : 'unknown hold');
+      if(cell.up){
+        const body = cell.hold.rest
+          ? `<div class="reward">+${cell.hold.rest} &#9670;</div>`
+          : `<div class="reqs">${reqCells(cell.hold, r, myTurn && sameCell(target,{r,c}))}</div>`;
+        h.innerHTML = `<div class="hname">${cell.hold.n}</div>${body}`;
+      }
+      const here = players.filter(p=>sameCell(p.pos,{r,c}));
+      if(here.length){
+        const t = document.createElement('div');
+        t.className = 'tokens';
+        t.innerHTML = here.map(p=>`<span class="tok" style="--pc:${p.ch.c}"></span>`).join('');
+        h.appendChild(t);
+      }
+      h.onclick = ()=>pick(r,c);
+      wrap.appendChild(h);
+      row.appendChild(wrap);
+    }
+    b.appendChild(row);
+  }
+  const g = document.getElementById('ground');
+  const onGround = !players[cur].pos;
+  g.className = 'ground' + (onGround ? '' : '');
+  g.textContent = onGround
+    ? players[cur].ch.n + ' is on the ground. Pick a hold in the bottom row.'
+    : 'the ground';
+}
+
+function drawMats(){
+  document.getElementById('mats').innerHTML = players.map((p,i)=>{
+    const m = v => (v>0?'+':'') + v;
+
+    /* drop track: TRACK counters, with the recovery ceiling marked after p.max */
+    let track = '';
+    for(let k=0;k<TRACK;k++){
+      if(k === p.max) track += '<span class="ceil" title="recovery ceiling"></span>';
+      const cls = k >= p.water ? 'empty' : (k >= p.max ? 'over' : 'full');
+      track += `<span class="slot ${cls}"></span>`;
+    }
+
+    const uses = p.ability.charges
+      ? `${p.charges} of ${p.ability.charges} left`
+      : (p.ability.id==='lungs' ? `${ROWS-p.lungRows.size} of ${ROWS} rows left`
+      : 'always on');
+
+    const at = p.topped ? 'topped out' : (p.pos ? `row ${p.pos.r+1}` : 'on the ground');
+
+    return `<div class="mat ${i===cur?'active':''}" style="--pc:${p.ch.c}">
+      <div class="who">
+        <span class="pip"></span>
+        <span class="name">${p.ch.n}</span>
+        <span class="seat">${p.isBot ? 'CPU' : (TABLES[tableIdx].humans>1 ? 'P'+(i+1) : 'you')}</span>
+        ${p.topped?'<span class="badge">topped</span>':''}
+      </div>
+      <div class="role">${p.ch.r}</div>
+
+      <div class="stats">
+        <div class="stat s"><b>${m(p.ch.S)}</b>STR</div>
+        <div class="stat e"><b>${m(p.ch.E)}</b>END</div>
+        <div class="stat t"><b>${m(p.ch.T)}</b>TEC</div>
+      </div>
+
+      <div class="cardslot">
+        <div class="cardhead">
+          <span class="cname">${p.ability.n}</span>
+          <span class="cuses">${p.ability.band} &middot; ${uses}</span>
+        </div>
+        <div class="ctext">${p.ability.t}</div>
+      </div>
+
+      <div class="tracker">
+        <div class="tlabel">
+          <span>drops</span>
+          ${p.delta ? `<span class="delta ${p.delta>0?'up':'down'}">${p.delta>0?'+':''}${p.delta}</span>` : ''}
+          <span class="tnum">${p.water > p.max
+            ? `${p.water}, ceiling ${p.max}`
+            : `${Math.max(0,p.water)} of ${p.max}`}</span>
+        </div>
+        <div class="track">${track}</div>
+        ${p.seatBonus ? `<div class="thead">+${p.seatBonus} head start, spends once</div>` : ''}
+      </div>
+
+      <div class="counters">
+        ${lives ? `<div class="ctr lives"><b>${lives}</b><span>lives left</span></div>` : ''}
+        <div class="ctr fa"><b>${p.fas}</b><span>first ascents</span></div>
+        <div class="ctr"><b>${p.falls}</b><span>${p.falls===0?'flash alive':'pump-outs'}</span></div>
+        <div class="ctr where"><span>${at}</span></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function drawTurn(){
+  const p = players[cur];
+  const many = TABLES[tableIdx].humans > 1;
+  const who = many && !p.isBot ? `P${players.indexOf(p)+1}, ${p.ch.n}` : p.ch.n;
+  document.getElementById('turnLabel').textContent =
+    gameOver ? 'Route over'
+      : (finalRound ? who + ', last turn' : who + (p.isBot ? ' is climbing' : ' to climb'));
+  const tb = document.getElementById('targetbox');
+  if(gameOver){
+    tb.innerHTML = defeated
+      ? `<b>The route wins.</b>You ran out of lives. Start a new crag to try again.`
+      : (winner
+          ? `<b>${winner.ch.n} ${players.length===1?'tops out. Route sent.':'wins.'}</b>Start a new crag to run it again.`
+          : `<b>Route over.</b>Start a new crag to run it again.`);
+    return;
+  }
+  if(p.topped){ tb.textContent = p.ch.n + ' is already on the summit.'; return; }
+  if(!target){
+    const stuck = legalMoves(p).length===0;
+    const handover = TABLES[tableIdx].humans > 1 && !p.isBot
+      ? `<b>Pass the tablet to P${players.indexOf(p)+1}.</b>` : '';
+    tb.innerHTML = p.isBot ? 'Reading the sequence.'
+      : handover + (stuck ? 'Every hold in reach is taken. Chalk up and pass instead.'
+               : 'Pick a highlighted hold to try for.');
+    return;
+  }
+  const cell = board[target.r][target.c];
+  const exp = attemptCost(p, target.r, target.c);
+  const notes = [];
+  if(p.ability.id==='arete' && onArete(target.c) && p.charges>0)
+    notes.push(`Arête Specialist: after the roll, add 1 to any one category. ${p.charges} left.`);
+  if(attemptReach) notes.push('Long Reach: two rows in one move. You pay the toll for both rows crossed, plus 1 drop for the hold you skip.');
+  if(onsightDeclared) notes.push('Onsight called: clean is worth 2 drops, anything less costs 2.');
+  if(p.ability.id==='beta') notes.push('Beta Reader: after the roll you may reroll one die that came up short.');
+  if(p.ability.id==='static' && p.charges>0) notes.push('Static Master: after the roll you may simply waive one category, once per route.');
+  if(p.ability.id==='efficient') notes.push('Efficient: backing off this attempt costs you nothing.');
+  const held = occupant(target.r,target.c,p);
+  if(held && p.ability.id==='poach' && !(board[target.r][target.c].hold.rest))
+    notes.push(`Poacher: establish this and ${held.ch.n} is knocked to the ground.`);
+  const bonus = notes.length
+    ? `<br><span style="color:var(--lichen)">${notes.join(' ')}</span>` : '';
+  const listed = RULES.exposure(target.r);
+  const cost = exp
+    ? `<br><span style="color:var(--str)">Above halfway: ${exp} drop${exp>1?'s':''} spent just to reach for it.</span>`
+    : (listed
+        ? `<br><span style="color:var(--lichen)">Your ability covers the ${listed}-drop toll here.</span>`
+        : `<br><span style="color:var(--chalk-dim)">Low enough to reach for free.</span>`);
+  const after = p.water - exp;
+  const risk = after <= RULES.failCost
+    ? `<br><span style="color:var(--str)">WARNING: after the toll you will hold ${after} drop${after===1?'':'s'}. Anything but a clean latch empties you, and you will drop ${RULES.fallRows} rows.</span>`
+    : `<br><span style="color:var(--chalk-dim)">Come up short and you choose: pay a drop per point to force it, or ${RULES.failCost} drop to back off. Empty your water and you drop ${RULES.fallRows} rows.</span>`;
+  if(cell.up){
+    const mods = effMods(p);
+    const eff = effReqs(cell.hold, target.r);
+    const cats = [['strength','str',eff[0]],['endurance','end',eff[1]],['technique','tec',eff[2]]];
+    const line = cats.map(([name,col,q],i)=>{
+      const need = Math.max(0, q - mods[i]);
+      return `<span style="color:var(--${col})">${q} ${name}${need!==q ? `, roll ${need}` : ''}</span>`;
+    }).join(', ');
+    tb.innerHTML = cell.hold.rest
+      ? `<b>${cell.hold.n}</b>Nothing to match. Take it for free and drink ${cell.hold.rest} drops.`
+      : `<b>${cell.hold.n}</b>needs ${line}.
+      <br><span style="font-family:Spectral,serif;font-style:italic">${cell.hold.f}</span>${bonus}${cost}${risk}`;
+  } else {
+    tb.innerHTML = `<b>Face-down hold</b>You are climbing blind. Your first point of
+      shortfall is forgiven, and latching it banks a first ascent.${bonus}${cost}${risk}`;
+  }
+}
+
+function resetDice(){
+  ['f0','f1','f2','f3'].forEach(id=>{
+    const el = document.getElementById(id);
+    el.textContent = '–'; el.className = 'face'; el.style.color = '';
+  });
+  document.querySelectorAll('.dicerow .die').forEach(d=>d.classList.remove('bumped','bumpable'));
+  document.getElementById('breakdown').hidden = true;
+  document.getElementById('verdict').textContent = '';
+  updateControls();
+}
+
+function updateControls(){
+  const roll = document.getElementById('btnRoll');
+  const bail = document.getElementById('btnBail');
+  const pass = document.getElementById('btnPass');
+  const p = players[cur];
+  const dec0 = document.getElementById('btnDeclare');
+  const sc0 = document.getElementById('btnScout');
+  sc0.hidden = true;
+  if(gameOver){
+    roll.disabled = true; roll.textContent = 'Route over';
+    bail.hidden = true; pass.hidden = true; dec0.hidden = true; return;
+  }
+  if(p.isBot){
+    roll.disabled = true; roll.textContent = p.ch.n + ' is climbing';
+    bail.hidden = true; pass.hidden = true; dec0.hidden = true; return;
+  }
+  document.getElementById('btnDeclare').hidden = true;
+  if(phase==='decide'){
+    const n = lastEval ? lastEval.net : 0;
+    const pay = payment(p,n);
+    if(comesOff(p, lastEval)){
+      roll.textContent = `${n} off with no water left, you come off`; roll.disabled = false;
+      bail.hidden = true; pass.hidden = true; return;
+    }
+    if(pay===0){ roll.textContent = 'Take the hold, free'; roll.disabled = false; }
+    else { roll.textContent = `Take the hold, lose ${pay} drop${pay>1?'s':''}`; roll.disabled = false; }
+    bail.hidden = mustCommit(lastEval);          /* no retreat from a big miss */
+    bail.textContent = `Back off, ${RULES.failCost} drop`;
+    pass.hidden = true;
+    return;
+  }
+  bail.hidden = true;
+  const dec = document.getElementById('btnDeclare');
+  dec.hidden = !canDeclare(p);
+  const sc = document.getElementById('btnScout');
+  sc.hidden = !canScout(p);
+  sc.textContent = scoutMode ? 'Cancel scouting' : 'Scout a hold';
+  pass.hidden = !!target;
+  pass.textContent = `Chalk up, regain ${blockedUp(p) ? 2 : 1}`;
+  roll.textContent = 'Roll for the hold';
+  roll.disabled = !target || rolling;
+}
+
+function setVerdict(html){ document.getElementById('verdict').innerHTML = html; }
+
+function note(label, delta){ ledger.push({label, delta}); }
+function noteAbility(label){ if(attemptInfo && label) attemptInfo.abilities.push(label); }
+
+const CATCOL = ['var(--str)','var(--end)','var(--tec)'];
+function triad(vals){
+  return vals.map((v,i)=>`<i style="color:${CATCOL[i]}">${v}</i>`).join('<s>/</s>');
+}
+
+/* one consolidated log entry per attempt */
+function logAttempt(p, ev, faces, moved, net){
+  const a = attemptInfo;
+  if(!a || !ev) return;
+  const reqs = ev.per.map(d=>d.req);
+  const got  = ev.per.map(d=>d.waived ? '&#10003;' : d.got);
+  const money = ledger.length
+    ? ledger.map(e=>`${e.label} ${e.delta>0?'+':''}${e.delta}`).join(' &middot; ')
+    : 'nothing spent';
+  const outcome = moved
+    ? (ev.net===0 ? 'took the hold for free' : `took the hold and lost ${payment(p,ev.net)} drop${payment(p,ev.net)>1?'s':''}`)
+    : `backed off and lost ${p.ability.id==='efficient'?0:RULES.failCost} drop`;
+  const rows = [
+    `<span class="ehead"><b>${p.ch.n}</b> row ${a.row+1} &middot; ${a.hold}${a.blind?' <em>(blind)</em>':''}</span>`,
+    `<span class="eline">hold needs ${triad(reqs)} &nbsp; you produced ${triad(got)} &nbsp; so ${
+      ev.net===0 ? 'nothing missing' : ev.net+' missing'}</span>`
+  ];
+  if(ev.cond) rows.push(`<span class="eline econd" style="color:${CONDCOL[ev.cond]}">conditions: ${condStory(ev)}</span>`);
+  if(ev.forgive && ev.raw > 0)
+    rows.push(`<span class="eline eblind">unexplored, so 1 less to find: ${ev.raw} becomes ${ev.net}</span>`);
+  if(a.abilities.length) rows.push(`<span class="eline eabil">${a.abilities.join(' &middot; ')}</span>`);
+  rows.push(`<span class="eline emoney">${money} &nbsp;&rarr;&nbsp; ${Math.max(0,p.water)} of ${p.max}</span>`);
+  rows.push(`<span class="eline eout">${outcome}</span>`);
+  say(rows.join(''), 'entry');
+}
+
+function drawLedger(net, water, max){
+  if(players[cur].isBot) return;   /* keep your own ledger on screen while the CPUs move */
+  const el = document.getElementById('ledger');
+  if(!ledger.length){ el.hidden = true; return; }
+  const chips = ledger.map(e=>{
+    const cls = e.delta > 0 ? 'up' : (e.delta < 0 ? 'down' : 'flat');
+    const sign = e.delta > 0 ? '+' : (e.delta < 0 ? '' : '');
+    return `<span class="chip ${cls}">${e.label} <b>${e.delta===0?'0':sign+e.delta}</b></span>`;
+  }).join('');
+  const netCls = net > 0 ? 'up' : (net < 0 ? 'down' : 'flat');
+  el.innerHTML = chips +
+    `<span class="chip total ${netCls}">net <b>${net>0?'+':''}${net}</b> &rarr; ${Math.max(0,water)} of ${max}</span>`;
+  el.hidden = false;
+}
+
+function say(t, cls){
+  const l = document.getElementById('log');
+  l.insertAdjacentHTML('afterbegin', `<p class="${cls||''}">${t}</p>`);
+}
+
+/* ============================================================
+   INTERACTION
+   ============================================================ */
+function canScout(p){
+  return !!(p.ability.id==='guide' && !scoutedTurn && phase==='select' && !gameOver
+            && neighbours(p).some(n=>!board[n.r][n.c].up));
+}
+
+function scoutHold(r,c){
+  const p = players[cur];
+  if(!canScout(p)) return false;
+  if(board[r][c].up) return false;
+  if(!neighbours(p).some(n=>n.r===r && n.c===c)) return false;
+  board[r][c].up = true;
+  scoutedTurn = true; scoutMode = false;
+  say(`<b>${p.ch.n}</b> checks the guidebook and turns over the hold on row ${r+1}.`);
+  setVerdict(`Scouted: ${board[r][c].hold.n}. It is face up for everyone now, and no longer blind for you.`);
+  drawAll();
+  return true;
+}
+
+function pick(r,c){
+  if(scoutMode){ scoutHold(r,c); updateControls(); return; }
+  if(!isReachable(r,c)) return;
+  const me = players[cur];
+  if(onsightDeclared){ me.charges++; onsightDeclared = false; }   /* changed your mind, take it back */
+  target = {r,c}; pending = null; lastEval = null;
+  boostUsed = false; boosts = [0,0,0]; freeCats = [false,false,false];
+  attemptReach = spanKind(me, r, c);
+  attemptBlind = !board[r][c].up;
+  phase = 'select';
+  ledger = [];
+  document.getElementById('ledger').hidden = true;
+  drawBoard(); drawTurn(); resetDice();
+  if(window.matchMedia('(max-width:1100px)').matches){
+    document.getElementById('colAttempt').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+
+function faceEl(i){ return document.getElementById('f'+i); }
+
+const CONDCOL = {plus:'var(--lichen)', minus:'var(--str)', drop:'var(--end)', slip:'var(--str)'};
+
+function showFace(i,f){
+  const el = faceEl(i);
+  if(i===3){
+    el.textContent = f.g;
+    el.className = 'face cond';
+    el.style.color = CONDCOL[f.k];
+    return;
+  }
+  el.textContent = f.v;
+  el.className = 'face';
+  el.style.color = '';
+}
+
+/* --------------- what tapping a die does, by ability --------------- */
+const STATNAMES = ['strength','endurance','technique'];
+
+function dieOption(p){
+  if(boostUsed || !target || !pending) return null;
+  switch(p.ability.id){
+    case 'arete':
+      if(!onArete(target.c) || p.charges<=0) return null;
+      return {kind:'boost',  label:'add 1 to that category, free'};
+    case 'beta':
+      return {kind:'reroll', label:'reroll that die'};
+    case 'static':
+      if(p.charges<=0) return null;
+      return {kind:'waive',  label:'treat that category as matched'};
+    default: return null;
+  }
+}
+
+function tappableDice(p){
+  const opt = dieOption(p);
+  if(!opt || !lastEval) return [];
+  const cats = [0,1,2].filter(i=>lastEval.per[i].miss>0);
+  if(opt.kind==='reroll' && (lastEval.cond==='minus' || lastEval.cond==='slip')) cats.push(3);
+  return cats;
+}
+
+function markBoostable(){
+  const p = players[cur];
+  const live = (phase==='decide' && !p.isBot) ? tappableDice(p) : [];
+  document.querySelectorAll('.dicerow .die').forEach((el,i)=>{
+    el.classList.toggle('bumpable', live.includes(i));
+  });
+}
+
+function applyBoost(i){
+  const p = players[cur];
+  const opt = dieOption(p);
+  if(!opt || !tappableDice(p).includes(i)) return false;
+  const dice = document.querySelectorAll('.dicerow .die');
+
+  if(opt.kind==='boost'){
+    boosts[i]++;
+    boostUsed = true;
+    p.charges--;
+    showFace(i, pending[i]);
+    dice[i].classList.add('bumped');
+    noteAbility(`arête specialist: +1 ${STATNAMES[i]}, ${p.charges} left`);
+    drawMats();
+    refreshDecide();
+    return true;
+  }
+
+  if(opt.kind==='waive'){
+    freeCats[i] = true;
+    boostUsed = true;
+    p.charges--;
+    dice[i].classList.add('bumped');
+    noteAbility(`static master: ${STATNAMES[i]} waived`);
+    drawMats();
+    refreshDecide();
+    return true;
+  }
+
+  /* reroll: one die spins again */
+  boostUsed = true;
+  phase = 'busy'; updateControls();
+  noteAbility(`beta reader: rerolled the ${i===3?'condition':STATNAMES[i]} die`);
+  spinDice([i], ()=>{ phase = 'decide'; refreshDecide(); });
+  return true;
+}
+
+function canDeclare(p){
+  return !!(p.ability.id==='onsight' && p.charges>0 && !onsightDeclared
+            && target && attemptBlind && phase==='select');
+}
+
+function declareOnsight(){
+  const p = players[cur];
+  if(!canDeclare(p)) return;
+  p.charges--; onsightDeclared = true;
+  say(`<b>${p.ch.n}</b> calls the onsight on row ${target.r+1}. No second chances.`);
+  setVerdict('Onsight declared. Establish it clean for 2 drops back, come up short and lose 2.');
+  drawMats(); drawTurn(); updateControls();
+}
+
+function refreshDecide(){
+  if(!target || !pending) return;
+  lastEval = evaluate(players[cur], board[target.r][target.c], pending, attemptBlind);
+  showBreakdown(lastEval);
+  markBoostable();
+  if(!players[cur].isBot){ previewVerdict(); updateControls(); }
+}
+
+/* --------------- judging the dice --------------- */
+function evaluate(p,cell,res,blind){
+  const reqs = effReqs(cell.hold, target.r);
+  const mods = effMods(p);
+  const per = res.slice(0,3).map((f,i)=>{
+    const got = Math.max(0, f.v + mods[i]) + boosts[i];
+    return {got, rolled:got, req:reqs[i], miss:0, waived:freeCats[i]};
+  });
+  const remiss = ()=>per.forEach(d=>{ d.miss = d.waived ? 0 : Math.max(0, d.req - d.got); });
+  remiss();
+  const cats = per.reduce((s,d)=>s+d.miss, 0);   /* shortfall before conditions */
+
+  /* the condition die raises or lowers ONE category, always placed where it does you most good */
+  const cond = res[3] ? res[3].k : null;
+  let condTarget = null, condAbsorbed = false;
+  if(cond === 'plus'){
+    let best = -1;
+    per.forEach((d,i)=>{ if(!d.waived && d.miss > 0 && (best<0 || d.miss > per[best].miss)) best = i; });
+    if(best >= 0){ per[best].got += 1; condTarget = best; }   /* nothing short, so wasted */
+    remiss();
+  } else if(cond === 'minus'){
+    /* bad conditions hit the crux: the category this hold demands most.
+       You only escape it if you overshot in that exact category. */
+    let hit = -1;
+    per.forEach((d,i)=>{
+      if(d.waived) return;
+      if(hit < 0 || d.req > per[hit].req) hit = i;
+    });
+    if(hit >= 0){
+      condAbsorbed = per[hit].got - per[hit].req >= 1;
+      per[hit].got = Math.max(0, per[hit].got - 1);
+      condTarget = hit;
+    }
+    remiss();
+  }
+
+  const raw = per.reduce((s,d)=>s+d.miss, 0);
+  const forgive = blind ? 1 : 0;
+  return {per, cats, cond, condTarget, condAbsorbed, raw, forgive, net: Math.max(0, raw - forgive)};
+}
+
+/* drops needed to force a move that is n points short */
+function payment(p,n){
+  if(n===0) return 0;
+  return (n===1 && p.ability.id==='dynamic') ? 0 : n;
+}
+const affordable = (p,n) => payment(p,n)===0 || p.water > payment(p,n);
+
+function showBreakdown(ev){
+  const cls = ['var(--str)','var(--end)','var(--tec)'];
+  const boxes = ev.per.map((d,i)=>{
+    const moved = d.got !== d.rolled;
+    const face = d.waived ? 'matched'
+      : (moved ? `${d.rolled}&rarr;${d.got} / ${d.req}` : `${d.got} / ${d.req}`);
+    return `<div class="${d.waived?'waived':(d.miss?'short':'')}" style="color:${cls[i]}">${face}</div>`;
+  });
+  if(ev.cond){
+    const who = ev.condTarget!==null ? STATNAMES[ev.condTarget].slice(0,3) : '';
+    const txt = ev.cond==='plus' ? (ev.condTarget!==null?`+1 ${who}`:'+1 wasted')
+      : ev.cond==='minus' ? (ev.condTarget!==null?`\u22121 ${who}`:'\u22121')
+      : (ev.cond==='drop' ? 'drink' : 'slip');
+    const good = ev.cond==='drop' || ev.cond==='plus' || (ev.cond==='minus' && ev.condAbsorbed);
+    boxes.push(`<div class="${good?'waived':'short'}" style="color:${CONDCOL[ev.cond]}">${txt}</div>`);
+  }
+  document.getElementById('breakdown').innerHTML = boxes.join('');
+  document.getElementById('breakdown').hidden = false;
+}
+
+function previewVerdict(){
+  if(!lastEval || !target) return;
+  const p = players[cur], ev = lastEval, n = ev.net;
+  const pay = payment(p,n);
+  const bits = [];
+  if(comesOff(p, ev))
+    bits.push(`You are ${n} off and fighting it would cost ${pay} drops you do not have. You come off and drop ${RULES.fallRows} rows.`);
+  else if(n===0) bits.push('You matched every category. Take the hold for free.');
+  else if(pay===0) bits.push('You are 1 off, but a dynamic move covers it. Take the hold for free.');
+  else if(mustCommit(ev))
+    bits.push(`You are ${n} off. That is too far gone to climb back down, so you fight for it and lose ${pay} drops.`);
+  else bits.push(`You are ${n} off. Take the hold and lose ${pay} drop${pay>1?'s':''}, or back off and lose ${RULES.failCost}.`);
+  if(ev.cond==='plus' || ev.cond==='minus') bits.push(condStory(ev).charAt(0).toUpperCase()+condStory(ev).slice(1)+'.');
+  if(ev.cond==='slip') bits.push('You will slip and lose a drop whatever you choose.');
+  if(attemptBlind && ev.raw>0) bits.push(`${ev.forgive} point${ev.forgive>1?'s':''} forgiven for climbing blind.`);
+  const cats = tappableDice(p);
+  if(cats.length) bits.push(`Tap ${cats.map(i=>STATNAMES[i]).join(' or ')} to ${dieOption(p).label}.`);
+  setVerdict(bits.join(' '));
+}
+
+/* --------------- rolling --------------- */
+function spinDice(idxs, done){
+  const g0 = gen;
+  rolling = true;
+  const dice = document.querySelectorAll('.dicerow .die');
+  idxs.forEach(i=>dice[i].classList.add('rolling'));
+  const spin = setInterval(()=>{
+    idxs.forEach(i=>showFace(i, poolFor(i)[Math.random()*6|0]));
+  },70);
+  setTimeout(()=>{
+    clearInterval(spin);
+    if(gen !== g0){ rolling = false; return; }   /* a new route was laid out mid-roll */
+    idxs.forEach(i=>{
+      dice[i].classList.remove('rolling','bumped');
+      pending[i] = poolFor(i)[Math.random()*6|0];
+      showFace(i,pending[i]);
+    });
+    rolling = false;
+    done();
+  }, 550);
+}
+
+function doRoll(){
+  if(!target || rolling || gameOver) return;
+  const p = players[cur];
+  phase = 'busy'; updateControls();
+
+  if(attemptReach === 'card' && p.charges > 0){
+    p.charges--;
+  
+  }
+  ledger = [];
+  startWater = p.water;
+  p.delta = null;
+  const exp = attemptCost(p, target.r, target.c);
+  const listed = RULES.exposure(target.r);
+  if(exp){
+    p.water -= exp;
+    note(attemptReach ? 'span toll' : `row ${target.r+1} toll`, -exp);
+    drawMats();
+  } else if(listed && p.ability.id==='grip' && p.charges>0){
+    p.charges--;
+    note('iron grip covered the toll', 0);
+    noteAbility(`iron grip: no toll, ${p.charges} left`);
+    say(`<b>${p.ch.n}</b> grips it out and pays no toll. ${p.charges} left.`);
+    drawMats();
+  } else if(listed && p.ability.id==='traverse'){
+    note('traverse, no toll', 0);
+    noteAbility('traverser: sideways, no toll');
+    say(`<b>${p.ch.n}</b> traverses across for free.`);
+  }
+
+  pending = [null,null,null,null];
+  spinDice([0,1,2,3], ()=>{
+    const cell = board[target.r][target.c];
+    if(!cell.up){ cell.up = true; drawBoard(); drawDeck(); }   /* the hold turns over after the roll */
+    attemptInfo = {row:target.r, col:target.c, hold:cell.hold.n, blind:attemptBlind, abilities:[]};
+    applyConditionWater(p);
+    if(attemptReach === 'card') attemptInfo.abilities.push('long reach, a two-hex span');
+    else if(attemptReach === 'desperate') attemptInfo.abilities.push('last-turn lunge, two rows straight up');
+    lastEval = evaluate(p, cell, pending, attemptBlind);
+    showBreakdown(lastEval);
+    if(p.isBot) later(botDecide, 700);
+    else { phase = 'decide'; markBoostable(); previewVerdict(); updateControls(); }
+  });
+}
+
+/* --------------- the two ways an attempt ends --------------- */
+/* Missing a lot means you are already off balance. No safe retreat:
+   you pay what it costs or you come off. */
+const mustCommit = ev => !!ev && ev.net >= RULES.commitAt;
+const comesOff = (p,ev) => mustCommit(ev) && !affordable(p, ev.net);
+
+function comeOff(){
+  if(!target || !lastEval || !pending) return;
+  const cell = board[target.r][target.c];
+  note('too far off, you came off', 0);
+  noteAbility(null);
+  finishAttempt([`You were ${lastEval.net} off on the ${cell.hold.n.toLowerCase()} with no water to fight it, so you came off.`],
+                false, 0, true);
+}
+
+/* the drop and the slip are not a decision, so they settle immediately.
+   That way the water you can see is the water you can spend. */
+function applyConditionWater(p){
+  const cf = pending[3] ? pending[3].k : null;
+  if(cf === 'slip'){
+    p.water -= 1;
+    note('slip', -1);
+  } else if(cf === 'drop'){
+    let g = 1;
+    if(p.ability.id === 'lungs' && !p.lungRows.has(target.r)){
+      p.lungRows.add(target.r); g += 1;
+      noteAbility('deep lungs: extra drop for this row');
+    }
+    const before = p.water;
+    p.water = Math.max(p.water, Math.min(p.max, p.water + g));
+    note(p.water > before ? 'drink' : 'drink, already full', p.water - before);
+  }
+  drawMats();
+}
+
+function climbIt(){
+  if(!target || !lastEval || !pending) return;
+  const p = players[cur];
+  if(comesOff(p, lastEval)) return comeOff();   /* too far off, and nothing left to fight with */
+  const r = target.r, c = target.c, cell = board[r][c];
+  const n = lastEval.net;
+  const pay = payment(p,n);
+  if(!affordable(p,n)) return;
+  const v = [];
+  if(n===0) v.push(`Latched the ${cell.hold.n.toLowerCase()} clean.`);
+  else if(pay===0){ note('dynamic move, short by 1', 0); noteAbility('dynamic mover: short by 1, paid nothing'); v.push(`Short by 1, but a dynamic move covers it for nothing.`); }
+  else { p.water -= pay; note(`${n} missing`, -pay); v.push(`You were ${n} off on the ${cell.hold.n.toLowerCase()} and paid ${pay} drop${pay>1?'s':''} to hold it anyway.`); }
+
+  let onsightGain = 0;
+  if(onsightDeclared){
+    if(n===0){ onsightGain = 2; v.push('Onsight called and delivered. 2 drops back.'); note('onsight delivered', 2); noteAbility('onsighter: delivered'); }
+    else { p.water -= 2; v.push('The onsight is blown. 2 drops gone.'); note('onsight blown', -2); noteAbility('onsighter: blown'); }
+  }
+
+  const victim = occupant(r,c,p);
+  if(victim && !cell.hold.rest && p.pos){
+    const from = {r:p.pos.r, c:p.pos.c};
+    victim.pos = from;
+    v.push(`${victim.ch.n} is muscled aside and ends up on your old hold, row ${from.r+1}.`);
+    say(`<b>${p.ch.n}</b> poached the hold from <b>${victim.ch.n}</b>. They swapped places.`);
+  }
+  p.pos = {r,c};
+  if(attemptBlind) p.fas++;
+  if(cell.hold.rest){ v.push(`A ledge like this returns ${cell.hold.rest} drops.`); note('rest ledge', cell.hold.rest); }
+  finishAttempt(v, true, (cell.hold.rest || 0) + onsightGain);
+}
+
+function backOff(){
+  if(!target || !pending) return;
+  const p = players[cur];
+  if(mustCommit(lastEval)) return;   /* too far gone to retreat */
+  const cell = board[target.r][target.c];
+  const bail = p.ability.id==='efficient' ? 0 : RULES.failCost;
+  p.water -= bail;
+  note(bail ? 'backed off' : 'backed off, efficient', -bail);
+  if(!bail) noteAbility('efficient: backing off cost nothing');
+  if(onsightDeclared){ p.water -= 2; }
+  const msg = [bail
+    ? `Backed off the ${cell.hold.n.toLowerCase()} for ${bail} drop. You stay where you are, and it is face up now.`
+    : `Backed off the ${cell.hold.n.toLowerCase()} for nothing. You stay where you are, and it is face up now.`];
+  if(onsightDeclared) msg.push('The onsight is blown. 2 more drops gone.');
+  finishAttempt(msg, false, 0);
+}
+
+function finishAttempt(v, moved, restGain, forceFall){
+  if(!target) return;
+  const p = players[cur];
+  const r = target.r;
+
+  const regain = restGain;   /* the condition die already settled when the dice landed */
+  if(regain){
+    const before = Math.max(0,p.water);
+    p.water = Math.max(p.water, Math.min(p.max, p.water + regain));   /* never claws back a head start */
+    if(p.water > before) v.push(`The ledge returned ${p.water-before} drop${p.water-before>1?'s':''}.`);
+  }
+
+  if(forceFall || p.water <= 0){
+    p.falls++;
+    if(lives){
+      lives--;
+      say(lives ? `<b>${lives}</b> ${lives===1?'life':'lives'} left.` : `<b>No lives left. The route wins.</b>`);
+      if(lives <= 0){ defeated = true; gameOver = true; }
+    }
+    const from = p.pos ? p.pos.r : r;
+    const col  = p.pos ? p.pos.c : target.c;
+    let land = from - RULES.fallRows;
+    while(land >= 0 && !canLand(p, land, col)) land--;   /* skip anything occupied */
+    if(land >= 0){
+      board[land][col].up = true;
+      p.pos = {r:land, c:col};
+      v.push(`${forceFall?'Off the wall.':'Completely pumped out.'} ${p.ch.n} drops ${from-land} row${from-land>1?'s':''} and catches the ${board[land][col].hold.n.toLowerCase()} on row ${land+1}, back on full water.`);
+      say(`<b>${p.ch.n} ${forceFall?'CAME OFF':'PUMPED OUT'}</b> at row ${from+1} and dropped to row ${land+1}.`);
+    } else {
+      p.pos = null;
+      v.push(`Completely pumped out. ${p.ch.n} drops all the way to the ground, back on full water.`);
+      say(`<b>${p.ch.n} ${forceFall?'CAME OFF':'PUMPED OUT'}</b> at row ${from+1} and is back on the ground.`);
+    }
+    p.water = p.max;
+    if(p.falls===1) say(`The flash attempt is over for ${p.ch.n}.`);
+  }
+
+  if(p.pos && p.pos.r === ROWS-1){
+    p.topped = true;
+    if(players.length === 1){ gameOver = true; winner = p; }
+    v.push(p.falls===0
+      ? `${p.ch.n} tops out without pumping out once. A flash.`
+      : `${p.ch.n} tops out. Route sent.`);
+    say(p.falls===0
+      ? `<b>${p.ch.n} FLASHED THE ROUTE</b> ground to top, ${p.fas} first ascents, ${p.water} drops left.`
+      : `<b>${p.ch.n} TOPPED OUT</b> with ${p.fas} first ascents, ${p.falls} pump-outs and ${p.water} drops left.`);
+    if(!finalRound){
+      finalRound = true;
+      say(`Everyone else gets one last turn. Anyone on row 3 may lunge for the top.`);
+    }
+  }
+
+  const net = p.water - startWater;
+  p.delta = net;
+  logAttempt(p, lastEval, pending.slice(0,3).map(f=>f.v), moved, net);
+  drawLedger(net, p.water, p.max);
+  setVerdict(v.join(' '));
+  target = null; lastEval = null; pending = null;
+  boosts = [0,0,0]; freeCats = [false,false,false]; phase = 'select';
+  onsightDeclared = false; attemptReach = false;
+  document.querySelectorAll('.dicerow .die').forEach(d=>d.classList.remove('bumpable'));
+  drawAll();
+  nextTurn();
+}
+
+/* --------------- turn order --------------- */
+function endGame(){
+  gameOver = true;
+  const tops = players.filter(pl=>pl.topped);
+  if(!tops.length){ winner = null; drawAll(); updateControls(); return; }
+  winner = tops.length > 1
+    ? tops.slice().sort((a,b)=> (b.water-a.water) || (b.fas-a.fas))[0]
+    : tops[0];
+  if(tops.length > 1)
+    say(`Both topped out, so it goes to water left: <b>${winner.ch.n}</b> takes it with ${winner.water}.`);
+  say(`<b>${winner.ch.n} WINS.</b>`);
+  drawAll(); updateControls();
+}
+
+function nextTurn(){
+  if(gameOver) return;
+  boostUsed = false; boosts = [0,0,0]; freeCats = [false,false,false];
+  onsightDeclared = false; attemptReach = false;
+  scoutMode = false; scoutedTurn = false;
+  if(finalRound){
+    players[cur].finalDone = true;
+    const idx = players.findIndex(pl=>!pl.topped && !pl.finalDone);
+    if(idx < 0){ endGame(); return; }
+    cur = idx;
+  } else {
+    do { cur = (cur+1) % players.length; } while(players[cur].topped);
+  }
+  drawAll();
+  updateControls();
+  if(players[cur].isBot) later(botTurn, 550);
+}
+
+/* nothing above you free? then you are stuck below traffic */
+function blockedUp(p){
+  const mv = legalMoves(p);
+  if(!p.pos) return mv.length === 0;
+  return !mv.some(m=>m.r > p.pos.r);
+}
+
+function passTurn(){
+  const p = players[cur];
+  const stuck = blockedUp(p);
+  const gain = stuck ? 2 : 1;
+  const w0 = p.water;
+  p.delta = null;
+  p.water = Math.max(p.water, Math.min(p.max, p.water + gain));
+  ledger = [];
+  note(stuck ? 'rest under traffic' : 'chalk up', gain);
+  p.delta = p.water - w0;
+  drawLedger(p.delta, p.water, p.max);
+  say(stuck
+    ? `<b>${p.ch.n}</b> is stuck under traffic and takes a proper rest, ${gain} drops back.`
+    : `<b>${p.ch.n}</b> chalked up and shook out, one drop back.`);
+  setVerdict(stuck
+    ? `Nothing above you is free, so you settle in and recover ${gain} drops instead of 1.`
+    : `${p.ch.n} rested instead of climbing, regaining one drop.`);
+  target = null;
+  drawAll();
+  nextTurn();
+}
+
+/* --------------- the CPU climber --------------- */
+function hiddenExpected(p){
+  const rem = hiddenTiles();
+  if(!rem.length) return 1.5;
+  const mods = effMods(p);
+  const tot = rem.reduce((s,h)=>
+    s + [h.S,h.E,h.T].reduce((a,q,i)=>a + Math.max(0, q - (1.67 + mods[i])), 0), 0);
+  return tot / rem.length;
+}
+
+function scoreMove(p,m){   /* lower is better */
+  const cell = board[m.r][m.c];
+  const mods = effMods(p);
+  const toll = RULES.exposure(m.r);
+  let expected;
+  if(cell.up){
+    expected = effReqs(cell.hold, m.r)
+      .reduce((s,q,i)=> s + Math.max(0, q - (1.67 + mods[i])), 0);
+  } else {
+    expected = Math.max(0, hiddenExpected(p) - 1)
+             + (m.r === ROWS-1 ? RULES.lipBonus : 0);   /* blind, one point forgiven, plus the lip */
+  }
+  let cost = toll + expected;
+  if(!cell.up) cost -= 0.4;                                        /* exploring is worth something */
+  if(cell.up && cell.hold.rest && p.water < p.max-1) cost -= 1.8;   /* go and drink */
+  if(p.ability.id==='arete' && onArete(m.c)) cost -= 0.6;
+  if(p.ability.id==='onsight' && p.charges>0 && !cell.up) cost -= 0.3;
+  if(p.ability.id==='poach' && occupant(m.r,m.c,p)) cost -= 0.8;      /* swap them down */
+  if(p.pos && m.r === p.pos.r + 2) cost -= 1.4;                        /* skipping a row is tempo */
+  if(p.water - toll - expected < 1) cost += 2;                      /* risks pumping out */
+  const climbing = m.r > (p.pos ? p.pos.r : -1);
+  if(!climbing) cost += 1.2;                                        /* sideways is a detour */
+  return cost;
+}
+
+function botDecide(){
+  if(!lastEval || !target) return;
+  const p = players[cur];
+  const opt = dieOption(p);
+  const cats = tappableDice(p);
+  if(opt && cats.length && worthTapping(p, opt, cats)){
+    /* index 3 is the condition die, which has no per-category entry */
+    const weight = i => i===3 ? 1.5 : lastEval.per[i].miss;
+    let best = cats[0];
+    cats.forEach(i=>{ if(weight(i) > weight(best)) best = i; });
+    const wasReroll = opt.kind === 'reroll';
+    applyBoost(best);
+    /* a reroll spins the die, so come back once the new face has landed */
+    if(wasReroll){ later(botDecide, 350); return; }
+  }
+  const n = lastEval.net;
+  if(comesOff(p, lastEval)){ later(comeOff, 400); return; }
+  const pay = payment(p,n);
+  const ceiling = p.water >= 4 ? 3 : 2;
+  const climb = pay===0 || mustCommit(lastEval) || (affordable(p,n) && pay <= ceiling);
+  later(()=>{ climb ? climbIt() : backOff(); }, 400);
+}
+
+/* is spending the tap actually worth it for the bot? */
+function worthTapping(p,opt,cats){
+  const n = lastEval.net;
+  if(n === 0) return false;
+  if(opt.kind === 'boost')  return true;                    /* free */
+  if(opt.kind === 'reroll') return true;                    /* free */
+  return n >= 2;                                            /* Static Master: save the charge */
+}
+
+function botTurn(){
+  if(gameOver) return;
+  const p = players[cur];
+  if(!p.isBot) return;
+  /* Guidebook: scout a neighbour before choosing */
+  if(p.ability.id==='guide' && !scoutedTurn){
+    const hidden = neighbours(p).filter(n=>!board[n.r][n.c].up);
+    if(hidden.length){
+      const t = hidden[Math.random()*hidden.length|0];
+      board[t.r][t.c].up = true; scoutedTurn = true;
+      say(`<b>${p.ch.n}</b> checks the guidebook and turns over row ${t.r+1}.`);
+      drawBoard(); drawDeck();
+    }
+  }
+  const moves = legalMoves(p);
+  if(!moves.length){ passTurn(); return; }
+  const ranked = moves.map(m=>({m, s:scoreMove(p,m)})).sort((a,b)=>a.s-b.s);
+  const best = ranked[0];
+  if(p.water <= 2 && best.s > 2.4 && p.pos){ passTurn(); return; }
+  target = best.m;
+  attemptReach = spanKind(p, target.r, target.c);   /* same flag the human path sets */
+  attemptBlind = !board[target.r][target.c].up;
+  boostUsed = false; boosts = [0,0,0]; freeCats = [false,false,false]; lastEval = null;
+  phase = 'select';
+  const cell = board[target.r][target.c];
+  if(p.ability.id==='onsight' && p.charges>0 && attemptBlind && p.water >= p.max-1){
+    p.charges--; onsightDeclared = true;
+    say(`<b>${p.ch.n}</b> calls the onsight on row ${target.r+1}.`);
+    drawMats();
+  }
+  drawBoard(); drawTurn(); resetDice();
+  later(doRoll, 500);
+}
+
+/* --------------- wiring --------------- */
+document.querySelectorAll('.dicerow .die').forEach((el,i)=>{
+  el.onclick = ()=>{
+    if(phase!=='decide' || rolling || players[cur].isBot) return;
+    if(!applyBoost(i)) return;
+    markBoostable();
+    previewVerdict();
+    updateControls();
+  };
+});
+
+document.getElementById('btnRoll').onclick = ()=>{
+  if(gameOver || players[cur].isBot || rolling) return;
+  if(phase==='decide') climbIt();
+  else doRoll();
+};
+
+document.getElementById('btnScout').onclick = ()=>{
+  if(gameOver || players[cur].isBot || rolling) return;
+  scoutMode = !scoutMode;
+  setVerdict(scoutMode
+    ? 'Pick a face-down hold next to you to turn it over. Everyone will see it.'
+    : 'Scouting cancelled.');
+  drawBoard(); updateControls();
+};
+
+document.getElementById('btnDeclare').onclick = ()=>{
+  if(gameOver || players[cur].isBot || rolling) return;
+  declareOnsight();
+};
+
+document.getElementById('btnBail').onclick = ()=>{
+  if(gameOver || players[cur].isBot || phase!=='decide' || rolling) return;
+  backOff();
+};
+
+document.getElementById('btnPass').onclick = ()=>{
+  if(gameOver || players[cur].isBot || phase!=='select' || rolling) return;
+  passTurn();
+};
+
+document.getElementById('btnRaw').onclick = ()=>{
+  showRaw = !showRaw;
+  document.getElementById('btnRaw').textContent = showRaw ? 'Show what you need' : 'Show raw numbers';
+  drawBoard(); drawDeck(); drawNote(); drawTurn();
+};
+
+document.getElementById('btnNew').onclick = newCrag;
+document.getElementById('btnRevealAll').onclick = ()=>{
+  board.forEach(r=>r.forEach(c=>c.up=true));
+  say('Someone read the guidebook. All holds face up.');
+  drawBoard(); drawTurn(); drawDeck();
+};
+
+const selT = document.getElementById('selTable');
+selT.innerHTML = TABLES.map((t,i)=>
+  `<option value="${i}" ${i===tableIdx?'selected':''}>${t.n}</option>`).join('');
+selT.onchange = ()=>{ tableIdx = +selT.value; newCrag(); };
+
+const selM = document.getElementById('selMap');
+selM.innerHTML = MAPS.map((m,i)=>
+  `<option value="${i}" ${i===mapIdx?'selected':''}>${m.n} &middot; ${m.cols}x${m.rows}</option>`).join('');
+selM.onchange = ()=>{ mapIdx = +selM.value; newCrag(); };
+
+const sel = document.getElementById('selChar');
+sel.innerHTML = CHARS.map((c,i)=>
+  `<option value="${i}">${c.n} (${[c.S,c.E,c.T].map(v=>(v>0?'+':'')+v).join('/')})</option>`).join('');
+sel.onchange = ()=>{ humanChar = +sel.value; newCrag(); };
+
+const selA = document.getElementById('selAbil');
+selA.innerHTML = `<option value="">dealt at random</option>` +
+  ABILITIES.map(a=>`<option value="${a.id}">${a.n}</option>`).join('');
+selA.onchange = ()=>{ humanAbil = selA.value; newCrag(); };
+
+newCrag();
+</script>
+<script>
+/* register the offline cache, but only when served over http(s);
+   opening the file straight off the disk skips this without complaining */
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
