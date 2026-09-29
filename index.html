@@ -63,7 +63,7 @@
   button.primary:hover:not(:disabled){background:#B0C563;border-color:#B0C563}
 
   .grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
-  .matband{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+  .matband{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:24px}
 
   .panel{background:linear-gradient(180deg,rgba(35,46,51,.9),rgba(27,36,40,.9));
     border:1px solid rgba(239,234,224,.12);border-radius:3px;padding:14px}
@@ -220,12 +220,17 @@
   .delta.down{color:#F0B5A6;background:rgba(195,69,47,.22)}
   .delta.up{color:#9FD4D2;background:rgba(62,142,140,.22)}
 
+  /* Move breakdown scorecard */
+  .scorecard { display: grid; grid-template-columns: 45px 1fr 1fr 1fr; gap: 5px; font-size: .85rem; text-align: center; margin-bottom: 12px; align-items: center; }
+  .scorecard .sc-head { font-size: .7rem; letter-spacing: .05em; color: var(--chalk-dim); text-transform: uppercase; border: none; }
+  .scorecard .sc-lbl { font-weight: 700; font-size: .8rem; }
+  .scorecard .sc-cell { border: 1px solid rgba(239,234,224,.14); border-radius: 2px; padding: 5px 0; background: rgba(24,31,34,.5); }
+  .scorecard .sc-cell.match { border-color: var(--lichen); background: rgba(156,176,78,.15); color: var(--chalk); font-weight: 700; }
+  .scorecard .sc-cell.short { border-color: var(--str); background: rgba(195,69,47,.15); color: var(--chalk); font-weight: 700; }
+  .scorecard .sc-cond { grid-column: 2 / -1; border-radius: 2px; padding: 5px 0; font-weight: 600; font-size: .8rem; }
+
   .verdict{font-family:'Spectral',Georgia,serif;font-size:.95rem;line-height:1.5;
     border-left:2px solid var(--lichen);padding-left:10px;margin-bottom:10px;min-height:1.4em}
-  .breakdown{display:flex;gap:6px;font-size:.78rem;margin-bottom:10px}
-  .breakdown div{flex:1;text-align:center;border:1px solid rgba(239,234,224,.14);padding:3px 0;border-radius:2px}
-  .breakdown div.short{border-color:var(--str);background:rgba(195,69,47,.16)}
-  .breakdown div.waived{border-color:var(--lichen);background:rgba(156,176,78,.18);font-size:.68rem}
   button.primary.alt{background:transparent;color:var(--chalk);border-color:var(--str)}
   button.primary.alt:hover:not(:disabled){background:rgba(195,69,47,.2);border-color:var(--str)}
   .log{font-size:.85rem;line-height:1.5;max-height:320px;overflow-y:auto;color:var(--chalk-dim)}
@@ -272,7 +277,7 @@
     .gradeCol{font-size:.68rem;padding-right:4px}
     .panel{padding:12px 11px}
     .panel + .panel{margin-top:12px}
-    .matband{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:14px}
+    .matband{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px}
     .mat{padding:9px 9px 8px;gap:6px}
     .mat .role{display:none}
     .cardslot{min-height:0}
@@ -308,9 +313,6 @@
     </div>
   </header>
 
-  <!-- ============ the four climbers, always on screen ============ -->
-  <div id="mats" class="matband"></div>
-
   <div class="grid">
 
     <!-- ============ LEFT: the crag ============ -->
@@ -342,7 +344,7 @@
           <div class="die t"><div class="face" id="f2">–</div><div class="lab">technique</div></div>
           <div class="die c"><div class="face" id="f3">–</div><div class="lab">conditions</div></div>
         </div>
-        <div class="breakdown" id="breakdown" hidden></div>
+        <div id="breakdown" hidden></div>
         <div class="ledger" id="ledger" hidden></div>
         <div class="verdict" id="verdict"></div>
         <div class="rollbar"><div class="btnrow">
@@ -407,6 +409,10 @@
       </div>
     </div>
   </div>
+
+  <!-- ============ the four climbers, always on screen ============ -->
+  <div id="mats" class="matband"></div>
+
 </div>
 
 <script>
@@ -1344,21 +1350,35 @@ const affordable = (p,n) => payment(p,n)===0 || p.water > payment(p,n);
 
 function showBreakdown(ev){
   const cls = ['var(--str)','var(--end)','var(--tec)'];
-  const boxes = ev.per.map((d,i)=>{
-    const moved = d.got !== d.rolled;
-    const face = d.waived ? 'matched'
-      : (moved ? `${d.rolled}&rarr;${d.got} / ${d.req}` : `${d.got} / ${d.req}`);
-    return `<div class="${d.waived?'waived':(d.miss?'short':'')}" style="color:${cls[i]}">${face}</div>`;
+  const names = ['STR', 'END', 'TEC'];
+  
+  let html = `<div class="scorecard">`;
+  html += `<div></div><div class="sc-head">Need</div><div class="sc-head">Rolled</div><div class="sc-head">Got</div>`;
+  
+  ev.per.forEach((d, i) => {
+    const status = d.waived ? 'match' : (d.miss ? 'short' : 'match');
+    
+    html += `<div class="sc-lbl" style="color:${cls[i]}">${names[i]}</div>`;
+    html += `<div class="sc-cell">${d.req}</div>`;
+    html += `<div class="sc-cell">${d.waived ? '-' : d.rolled}</div>`;
+    html += `<div class="sc-cell ${status}">${d.waived ? 'Waived' : d.got}</div>`;
   });
+  
   if(ev.cond){
-    const who = ev.condTarget!==null ? STATNAMES[ev.condTarget].slice(0,3) : '';
+    const who = ev.condTarget!==null ? STATNAMES[ev.condTarget].slice(0,3).toUpperCase() : '';
     const txt = ev.cond==='plus' ? (ev.condTarget!==null?`+1 ${who}`:'+1 wasted')
       : ev.cond==='minus' ? (ev.condTarget!==null?`\u22121 ${who}`:'\u22121')
-      : (ev.cond==='drop' ? 'drink' : 'slip');
+      : (ev.cond==='drop' ? 'Drink (+1 drop)' : 'Slip (-1 drop)');
     const good = ev.cond==='drop' || ev.cond==='plus' || (ev.cond==='minus' && ev.condAbsorbed);
-    boxes.push(`<div class="${good?'waived':'short'}" style="color:${CONDCOL[ev.cond]}">${txt}</div>`);
+    
+    const condStyle = `border: 1px solid ${good ? 'var(--lichen)' : 'var(--str)'}; background: ${good ? 'rgba(156,176,78,.15)' : 'rgba(195,69,47,.15)'}; color: ${CONDCOL[ev.cond]};`;
+    
+    html += `<div class="sc-lbl" style="color:var(--chalk-dim)">COND</div>`;
+    html += `<div class="sc-cond" style="${condStyle}">${txt}</div>`;
   }
-  document.getElementById('breakdown').innerHTML = boxes.join('');
+  
+  html += `</div>`;
+  document.getElementById('breakdown').innerHTML = html;
   document.getElementById('breakdown').hidden = false;
 }
 
