@@ -44,10 +44,10 @@
   a{color:var(--lichen)}
   h1,h2,h3{margin:0;font-weight:600;letter-spacing:.01em}
 
-  .shell{max-width:1360px;margin:0 auto;padding:22px 20px 60px}
+  .shell{max-width:1100px;margin:0 auto;padding:22px 20px 60px; display: flex; flex-direction: column; gap: 20px;}
 
   header.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:18px 26px;
-    border-bottom:1px solid rgba(239,234,224,.14);padding-bottom:14px;margin-bottom:22px}
+    border-bottom:1px solid rgba(239,234,224,.14);padding-bottom:14px;}
   .wordmark{font-size:2.1rem;line-height:.95;font-weight:700;letter-spacing:-.01em}
   .wordmark span{color:var(--lichen)}
   .routeline{font-family:'Spectral',Georgia,serif;font-style:italic;color:var(--chalk-dim);font-size:1rem}
@@ -62,12 +62,10 @@
   button.primary{background:var(--lichen);color:#12181A;border-color:var(--lichen);font-size:1.05rem;padding:12px 18px;width:100%}
   button.primary:hover:not(:disabled){background:#B0C563;border-color:#B0C563}
 
-  .grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
-  .matband{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:24px}
+  .matband{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;}
 
   .panel{background:linear-gradient(180deg,rgba(35,46,51,.9),rgba(27,36,40,.9));
     border:1px solid rgba(239,234,224,.12);border-radius:3px;padding:14px}
-  .panel + .panel{margin-top:16px}
   .panel h3{font-size:.95rem;color:var(--chalk-dim);font-weight:500;margin-bottom:10px}
 
   /* ---------- player mats ---------- */
@@ -121,6 +119,7 @@
   .ctr b{display:block;font-size:1rem;color:var(--chalk);font-variant-numeric:tabular-nums}
   .ctr.fa b{color:var(--lichen)}
   .ctr.lives b{color:var(--str)}
+  .ctr.chalks b{color:#9FD4D2}
   .ctr.where{display:flex;align-items:center;justify-content:center;font-size:.66rem}
 
   /* ---------- crag ---------- */
@@ -237,7 +236,7 @@
     border-left:2px solid var(--lichen);padding-left:10px;margin-bottom:10px;min-height:1.4em}
   button.primary.alt{background:transparent;color:var(--chalk);border-color:var(--str)}
   button.primary.alt:hover:not(:disabled){background:rgba(195,69,47,.2);border-color:var(--str)}
-  .log{font-size:.85rem;line-height:1.5;max-height:320px;overflow-y:auto;color:var(--chalk-dim)}
+  .log{font-size:.85rem;line-height:1.5;max-height:160px;overflow-y:auto;color:var(--chalk-dim)}
   .log p{margin:0 0 6px;padding-bottom:6px;border-bottom:1px solid rgba(239,234,224,.07)}
   .log p b{color:var(--chalk)}
   .log p.entry{display:flex;flex-direction:column;gap:2px;padding:7px 8px;margin-bottom:7px;
@@ -260,11 +259,8 @@
   .legend{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:.82rem;align-items:center}
   .legend b{font-size:1.05rem}
 
-  /* ---------- tablet ---------- */
+  /* ---------- tablet / responsive ---------- */
   @media (max-width:1100px){
-    .grid{grid-template-columns:1fr}
-    .col-crag{order:1}
-    .col-attempt{order:2}
     .matband{grid-template-columns:repeat(2,minmax(0,1fr))}
   }
 
@@ -276,12 +272,10 @@
     .routeline{font-size:.9rem}
     .toolbar{margin-left:0;width:100%}
     .toolbar button{flex:1;min-height:44px}
-    .grid{gap:14px}
     .cragwrap{padding:12px 4px 0;overflow-x:hidden}
     .gradeCol{font-size:.68rem;padding-right:4px}
     .panel{padding:12px 11px}
-    .panel + .panel{margin-top:12px}
-    .matband{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px}
+    .matband{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
     .mat{padding:9px 9px 8px;gap:6px}
     .mat .role{display:none}
     .cardslot{min-height:0}
@@ -304,6 +298,7 @@
 <body>
 <div class="shell">
 
+  <!-- ============ 1. Settings ============ -->
   <header class="top">
     <div>
       <div class="wordmark">Send <span>It</span></div>
@@ -320,108 +315,103 @@
     </div>
   </header>
 
-  <div class="grid">
-
-    <!-- ============ LEFT: the crag ============ -->
-    <div class="col-crag">
-      <div class="cragwrap">
-        <div style="display:flex;gap:4px;justify-content:center">
-          <div class="gradeCol" id="grades"></div>
-          <div class="board" id="board"></div>
-        </div>
-        <div class="boardnote" id="boardnote"></div>
-        <div class="ground" id="ground">the ground — start here</div>
+  <!-- ============ 2. Map (Crag) ============ -->
+  <div class="panel map-panel">
+    <div class="cragwrap">
+      <div style="display:flex;gap:4px;justify-content:center">
+        <div class="gradeCol" id="grades"></div>
+        <div class="board" id="board"></div>
       </div>
-      <div class="panel">
-        <details>
-          <summary>Tiles still face down</summary>
-          <div class="deckgrid" id="deckgrid"></div>
-        </details>
-      </div>
-    </div>
-
-    <!-- ============ RIGHT: attempt ============ -->
-    <div class="col-attempt" id="colAttempt">
-      <div class="panel">
-        <h3 id="turnLabel">Turn</h3>
-        <div class="targetbox" id="targetbox">Pick a hold to try for.</div>
-        
-        <div class="dicerow">
-          <div class="dicerow-label">Roll</div>
-          <div class="die s"><div class="face" id="f0">–</div><div class="lab">strength</div></div>
-          <div class="die e"><div class="face" id="f1">–</div><div class="lab">endurance</div></div>
-          <div class="die t"><div class="face" id="f2">–</div><div class="lab">technique</div></div>
-          <div class="die c"><div class="face" id="f3">–</div><div class="lab">conditions</div></div>
-        </div>
-        <div id="breakdown" hidden></div>
-        
-        <div class="ledger" id="ledger" hidden></div>
-        <div class="verdict" id="verdict"></div>
-        <div class="rollbar"><div class="btnrow">
-          <button class="primary" id="btnRoll" disabled>Roll for the hold</button>
-          <button class="primary alt" id="btnBail" hidden>Back off</button>
-          <button class="primary alt" id="btnDeclare" hidden>Call the onsight</button>
-          <button class="primary alt" id="btnScout" hidden>Scout a hold</button>
-          <button class="primary alt" id="btnPass" hidden>Chalk up, regain 2</button>
-        </div></div>
-      </div>
-
-      <div class="panel">
-        <h3>Move log</h3>
-        <div class="log" id="log"></div>
-      </div>
-
-      <div class="panel">
-        <h3>Dice faces</h3>
-        <div class="legend">
-          <b>0</b><span>one face: nothing, even an easy hold can spit you off</span>
-          <b>1</b><span>two faces</span>
-          <b>2</b><span>two faces</span>
-          <b>3</b><span>one face</span>
-          <b style="color:var(--lichen)">+1</b><span>conditions: raise one category by 1</span>
-          <b style="color:var(--str)">&minus;1</b><span>conditions: lower the hold's HARDEST category by 1. Two faces</span>
-          <b style="color:var(--end)">&#9670;</b><span>conditions: a drink, 1 drop back. Two faces</span>
-          <b style="color:var(--str)">&#10005;</b><span>conditions: a slip, 1 drop gone</span>
-        </div>
-      </div>
-
-      <div class="panel">
-        <details>
-          <summary>How this prototype resolves a move</summary>
-          <ul>
-            <li>Your character card carries a fixed stat line. Your ability is dealt at random from a pool of twelve at the start of the route, so the same climber plays differently each game. Abilities are marked ALWAYS, PER ATTEMPT or PER ROUTE.</li>
-            <li>The tiles come in sets of 15, and every route is a whole number of sets: 15, 30 or 45 holds. So the mix of hold types is identical in every game, one rest ledge per set, and the tank grows with the route.</li>
-            <li>The crag is one shuffled deck, dealt face down at random. No difficulty gradient, no guaranteed rest ledge.</li>
-            <li>What remains hidden is public knowledge, since the deck is fixed. You can count what is left, but never where it is.</li>
-            <li>Once a climber has topped out, everyone else gets one last turn. On that turn only, anyone two or more rows below the summit may lunge, attempting a hold two rows straight up for the row toll plus 1 drop. So from row 3 you still have a shot at the top, and from row 2 you are genuinely out of it.</li>
-            <li>Move up into either hold above you, or sideways along your row. No downclimbing. One climber per hold, except the rest ledge and except a Poacher, who can take an occupied hold and swap places with the climber on it.</li>
-            <li>Rows 1 and 2 are free to reach for. From row 3 up, every attempt costs 1 drop before the dice, win or lose. If that drop alone would empty you, the hold is out of reach and you must rest first.</li>
-            <li>Then roll. Three category dice, each showing 0, 1, 1, 2, 2, 3, plus one condition die rolled with them. A face-down hold turns over after the roll.</li>
-            <li>The condition die has six faces: +1, &minus;1, &minus;1, drop, drop, slip. Both act on ONE category, never on your total. The +1 goes where you are furthest short, your choice. The &minus;1 is not your choice: it lands on the category the hold demands MOST, the crux of the move, so you only escape it if you happened to overshoot there. A drop returns 1 water, a slip costs 1.</li>
-            <li>A requirement of 3 needs a rolled 3, or a 2 with a +1. Chalk counts as a flat 2 and ignores your modifiers. A -1 in a category makes a 3 there impossible to match, so you will always pay something on those holds.</li>
-            <li>Each hold type comes in several versions with different numbers, keeping one signature category fixed. A flat edge might be 2/1/1, 1/2/1 or 1/1/2, so the name tells you the family, never the exact demand.</li>
-            <li>Character boosts add 1 to a category, after the hold is face up, once per attempt.</li>
-            <li>Missing by 1 is considered a success and costs nothing.</li>
-            <li>Missing by 2 gives you a choice. Take the hold and pay 2 drops, or back off for 1 drop and stay where you are.</li>
-            <li>Missing by 3 or more means you are too far gone to back off. You must commit.</li>
-            <li>If the shortfall from your roll is equal to or greater than your remaining drops, you pass the Point of No Return and cannot back off. You must commit and take the fall.</li>
-            <li><b>The Reimbursement Rule:</b> If you attempt an unexplored hold that is vertically above you, and you successfully establish it, you are refunded the height toll you paid to reach it.</li>
-            <li>A rest ledge returns 2 drops when you establish it. Chalking up on your turn instead of climbing returns 2 drops. You may only chalk up ONCE per game.</li>
-            <li>Drops leave you in exactly four places: the row toll before the dice, a slip on the condition die, forcing a move you came up short on, and backing off. Rows 1 and 2 have no toll at all.</li>
-            <li>Running out of water is the ONLY way to come off the wall. It can happen from the height toll, from forcing a move, or from backing off. Water symbols are counted first, so they can save you.</li>
-            <li>When you empty your water you drop 2 rows, landing on that hold in your column and turning it face up, then refill to full. Below row 3 that means the ground. If the landing hold is taken you drop another row.</li>
-            <li>Play solo against the route with 3 lives, or with up to four climbers sharing one screen, any mix of people and CPU. Pass the device when the panel tells you to.</li>
-            <li>Climbers race the same crag. Who leads is random each route. Climbers later in the order may start with extra drops above their ceiling, tuned per route, because turn order is worth different amounts on a short boulder problem and on a big wall.</li>
-            <li>That head start sits ABOVE your ceiling. The mat has 8 drop counters, but only the first 5 can ever be recovered, marked by the red line. Spend the extras and they are gone, and a pump-out refills you to 5 like everyone else.</li>
-            <li>When a climber tops out, everyone else gets one last turn to match it. If more than one tops out, most water left wins, then most first ascents.</li>
-          </ul>
-        </details>
-      </div>
+      <div class="boardnote" id="boardnote"></div>
+      <div class="ground" id="ground">the ground — start here</div>
     </div>
   </div>
 
-  <!-- ============ the four climbers, always on screen ============ -->
+  <!-- ============ 3. Player Mats ============ -->
   <div id="mats" class="matband"></div>
+
+  <!-- ============ 4. Narrative Strip ============ -->
+  <div class="panel log-panel">
+    <h3>Game Narrative</h3>
+    <div class="log" id="log"></div>
+  </div>
+
+  <!-- ============ 5. Interactive Die Roll Area ============ -->
+  <div class="panel attempt-panel" id="colAttempt">
+    <h3 id="turnLabel">Turn</h3>
+    <div class="targetbox" id="targetbox">Pick a hold to try for.</div>
+    
+    <div class="dicerow">
+      <div class="dicerow-label">Roll</div>
+      <div class="die s"><div class="face" id="f0">–</div><div class="lab">strength</div></div>
+      <div class="die e"><div class="face" id="f1">–</div><div class="lab">endurance</div></div>
+      <div class="die t"><div class="face" id="f2">–</div><div class="lab">technique</div></div>
+      <div class="die c"><div class="face" id="f3">–</div><div class="lab">conditions</div></div>
+    </div>
+    <div id="breakdown" hidden></div>
+    
+    <div class="ledger" id="ledger" hidden></div>
+    <div class="verdict" id="verdict"></div>
+    <div class="rollbar"><div class="btnrow">
+      <button class="primary" id="btnRoll" disabled>Roll for the hold</button>
+      <button class="primary alt" id="btnBail" hidden>Back off</button>
+      <button class="primary alt" id="btnDeclare" hidden>Call the onsight</button>
+      <button class="primary alt" id="btnScout" hidden>Scout a hold</button>
+      <button class="primary alt" id="btnPass" hidden>Chalk up, regain 2</button>
+    </div></div>
+  </div>
+
+  <!-- ============ 6. Explanations ============ -->
+  <div class="panel explanations-panel">
+    <details>
+      <summary>Dice Faces Legend</summary>
+      <div class="legend">
+        <b>0</b><span>one face: nothing, even an easy hold can spit you off</span>
+        <b>1</b><span>two faces</span>
+        <b>2</b><span>two faces</span>
+        <b>3</b><span>one face</span>
+        <b style="color:var(--lichen)">+1</b><span>conditions: raise one category by 1</span>
+        <b style="color:var(--str)">&minus;1</b><span>conditions: lower the hold's HARDEST category by 1. Two faces</span>
+        <b style="color:var(--end)">&#9670;</b><span>conditions: a drink, 1 drop back. Two faces</span>
+        <b style="color:var(--str)">&#10005;</b><span>conditions: a slip, 1 drop gone</span>
+      </div>
+    </details>
+    <details>
+      <summary>How this prototype resolves a move</summary>
+      <ul>
+        <li>Your character card carries a fixed stat line. Your ability is dealt at random from a pool of twelve at the start of the route, so the same climber plays differently each game. Abilities are marked ALWAYS, PER ATTEMPT or PER ROUTE.</li>
+        <li>The tiles come in sets of 15, and every route is a whole number of sets: 15, 30 or 45 holds. So the mix of hold types is identical in every game, one rest ledge per set, and the tank grows with the route.</li>
+        <li>The crag is one shuffled deck, dealt face down at random. No difficulty gradient, no guaranteed rest ledge.</li>
+        <li>What remains hidden is public knowledge, since the deck is fixed. You can count what is left, but never where it is.</li>
+        <li>Once a climber has topped out, everyone else gets one last turn. On that turn only, anyone two or more rows below the summit may lunge, attempting a hold two rows straight up for the row toll plus 1 drop. So from row 3 you still have a shot at the top, and from row 2 you are genuinely out of it.</li>
+        <li>Move up into either hold above you, or sideways along your row. No downclimbing. One climber per hold, except the rest ledge and except a Poacher, who can take an occupied hold and swap places with the climber on it.</li>
+        <li>Rows 1 and 2 are free to reach for. From row 3 up, every attempt costs 1 drop before the dice, win or lose. If that drop alone would empty you, the hold is out of reach and you must rest first.</li>
+        <li>Then roll. Three category dice, each showing 0, 1, 1, 2, 2, 3, plus one condition die rolled with them. A face-down hold turns over after the roll.</li>
+        <li>The condition die has six faces: +1, &minus;1, &minus;1, drop, drop, slip. Both act on ONE category, never on your total. The +1 goes where you are furthest short, your choice. The &minus;1 is not your choice: it lands on the category the hold demands MOST, the crux of the move, so you only escape it if you happened to overshoot there. A drop returns 1 water, a slip costs 1.</li>
+        <li>A requirement of 3 needs a rolled 3, or a 2 with a +1. Chalk counts as a flat 2 and ignores your modifiers. A -1 in a category makes a 3 there impossible to match, so you will always pay something on those holds.</li>
+        <li>Each hold type comes in several versions with different numbers, keeping one signature category fixed. A flat edge might be 2/1/1, 1/2/1 or 1/1/2, so the name tells you the family, never the exact demand.</li>
+        <li>Character boosts add 1 to a category, after the hold is face up, once per attempt.</li>
+        <li>Missing by exactly 1 is considered a clean success and costs nothing.</li>
+        <li>Missing by 2 gives you a choice. Take the hold and pay 2 drops, or back off for 1 drop and stay where you are.</li>
+        <li>Missing by 3 or more means you are too far gone to back off. You must commit and fall.</li>
+        <li><b>Point of No Return:</b> If the shortfall payment is equal to or greater than your remaining drops, you pass the point of no return. You cannot back off and must commit and fall.</li>
+        <li><b>The Reimbursement Rule:</b> If you attempt an unexplored hold that is vertically above you, and you successfully establish it, you are immediately refunded the height toll you paid to reach it.</li>
+        <li>A rest ledge returns 2 drops when you establish it.</li>
+        <li>Chalking up on your turn instead of climbing returns 2 drops. You may only chalk up <b>ONCE</b> per game.</li>
+        <li>Drops leave you in exactly four places: the row toll before the dice, a slip on the condition die, forcing a move you came up short on, and backing off. Rows 1 and 2 have no toll at all.</li>
+        <li>Running out of water is the ONLY way to come off the wall. It can happen from the height toll, from forcing a move, or from backing off. Water symbols are counted first, so they can save you.</li>
+        <li>When you empty your water you drop 2 rows, landing on that hold in your column and turning it face up, then refill to full. Below row 3 that means the ground. If the landing hold is taken you drop another row.</li>
+        <li>Play solo against the route with 3 lives, or with up to four climbers sharing one screen, any mix of people and CPU. Pass the device when the panel tells you to.</li>
+        <li>Climbers race the same crag. Who leads is random each route. Climbers later in the order may start with extra drops above their ceiling, tuned per route, because turn order is worth different amounts on a short boulder problem and on a big wall.</li>
+        <li>That head start sits ABOVE your ceiling. The mat has 8 drop counters, but only the first 5 can ever be recovered, marked by the red line. Spend the extras and they are gone, and a pump-out refills you to 5 like everyone else.</li>
+        <li>When a climber tops out, everyone else gets one last turn to match it. If more than one tops out, most water left wins, then most first ascents.</li>
+      </ul>
+    </details>
+    <details>
+      <summary>Tiles still face down</summary>
+      <div class="deckgrid" id="deckgrid"></div>
+    </details>
+  </div>
 
 </div>
 
@@ -699,7 +689,7 @@ function newCrag(){
   say(`<b>${MAPS[mapIdx].n}</b>, ${COLS} by ${ROWS}. You are <b>${players[0].ch.n}</b> with <b>${players[0].ability.n}</b>.`);
   say(`Four on the route. Order: ${order}. Climbers later in the order start with a fuller tank.`);
   drawAll(); resetDice();
-  if(players[cur].isBot) later(botTurn, 800);
+  if(players[cur].isBot) later(botTurn, 1500);
 }
 
 /* ============================================================
@@ -976,6 +966,7 @@ function drawMats(){
       <div class="counters">
         ${lives ? `<div class="ctr lives"><b>${lives}</b><span>lives left</span></div>` : ''}
         <div class="ctr fa"><b>${p.fas}</b><span>first ascents</span></div>
+        <div class="ctr chalks"><b>${p.chalkUps}</b><span>chalks left</span></div>
         <div class="ctr"><b>${p.falls}</b><span>${p.falls===0?'flash alive':'pump-outs'}</span></div>
         <div class="ctr where"><span>${at}</span></div>
       </div>
@@ -1517,7 +1508,7 @@ function doRoll(){
     else if(attemptReach === 'desperate') attemptInfo.abilities.push('last-turn lunge, two rows straight up');
     lastEval = evaluate(p, cell, pending, attemptBlind);
     showBreakdown(lastEval);
-    if(p.isBot) later(botDecide, 700);
+    if(p.isBot) later(botDecide, 2500);
     else { phase = 'decide'; markBoostable(); previewVerdict(); updateControls(); }
   });
 }
@@ -1677,7 +1668,8 @@ function finishAttempt(v, moved, restGain, forceFall){
   onsightDeclared = false; attemptReach = false;
   document.querySelectorAll('.dicerow .die').forEach(d=>d.classList.remove('bumpable'));
   drawAll();
-  nextTurn();
+  
+  later(nextTurn, 1500);
 }
 
 /* --------------- turn order --------------- */
@@ -1709,7 +1701,7 @@ function nextTurn(){
   }
   drawAll();
   updateControls();
-  if(players[cur].isBot) later(botTurn, 550);
+  if(players[cur].isBot) later(botTurn, 1500);
 }
 
 function passTurn(){
@@ -1735,7 +1727,8 @@ function passTurn(){
   setVerdict(`${p.ch.n} rested instead of climbing, regaining ${gain} drops. No chalk ups remaining.`);
   target = null;
   drawAll();
-  nextTurn();
+  
+  later(nextTurn, 1500);
 }
 
 /* --------------- the CPU climber --------------- */
@@ -1787,14 +1780,14 @@ function botDecide(){
     const wasReroll = opt.kind === 'reroll';
     applyBoost(best);
     /* a reroll spins the die, so come back once the new face has landed */
-    if(wasReroll){ later(botDecide, 350); return; }
+    if(wasReroll){ later(botDecide, 1000); return; }
   }
   const n = lastEval.net;
-  if(comesOff(p, lastEval)){ later(comeOff, 400); return; }
+  if(comesOff(p, lastEval)){ later(comeOff, 2000); return; }
   const pay = payment(p,n);
   const ceiling = p.water >= 4 ? 3 : 2;
   const climb = pay===0 || mustCommit(p, lastEval) || (affordable(p,n) && pay <= ceiling);
-  later(()=>{ climb ? climbIt() : backOff(); }, 400);
+  later(()=>{ climb ? climbIt() : backOff(); }, 2000);
 }
 
 /* is spending the tap actually worth it for the bot? */
@@ -1844,7 +1837,7 @@ function botTurn(){
     drawMats();
   }
   drawBoard(); drawTurn(); resetDice();
-  later(doRoll, 500);
+  later(doRoll, 1500);
 }
 
 /* --------------- wiring --------------- */
