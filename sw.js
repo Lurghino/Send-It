@@ -1,6 +1,6 @@
 /* Send It — offline cache.
    Bump CACHE when you change index.html, otherwise the phone keeps the old one. */
-const CACHE = 'sendit-v2';
+const CACHE = 'sendit-v3';
 const SHELL = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'
