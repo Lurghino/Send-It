@@ -191,7 +191,9 @@
   /* ---------- attempt / dice ---------- */
   .targetbox{min-height:64px;font-size:.9rem;color:var(--chalk-dim);line-height:1.45}
   .targetbox b{color:var(--chalk);font-size:1.05rem;display:block;margin-bottom:3px}
+  
   .dicerow{display:flex;gap:7px;margin:4px 0 12px}
+  .dicerow-label { width: 45px; flex: none; display: flex; align-items: center; justify-content: flex-end; padding-right: 4px; font-weight: 700; color: var(--chalk-dim); font-size: .7rem; text-transform: uppercase; }
   .die{flex:1;aspect-ratio:1;border-radius:5px;background:#12181A;
     border:1px solid rgba(239,234,224,.18);display:flex;flex-direction:column;
     align-items:center;justify-content:center;gap:2px;position:relative}
@@ -221,13 +223,15 @@
   .delta.up{color:#9FD4D2;background:rgba(62,142,140,.22)}
 
   /* Move breakdown scorecard */
-  .scorecard { display: grid; grid-template-columns: 45px 1fr 1fr 1fr; gap: 5px; font-size: .85rem; text-align: center; margin-bottom: 12px; align-items: center; }
-  .scorecard .sc-head { font-size: .7rem; letter-spacing: .05em; color: var(--chalk-dim); text-transform: uppercase; border: none; }
-  .scorecard .sc-lbl { font-weight: 700; font-size: .8rem; }
-  .scorecard .sc-cell { border: 1px solid rgba(239,234,224,.14); border-radius: 2px; padding: 5px 0; background: rgba(24,31,34,.5); }
-  .scorecard .sc-cell.match { border-color: var(--lichen); background: rgba(156,176,78,.15); color: var(--chalk); font-weight: 700; }
-  .scorecard .sc-cell.short { border-color: var(--str); background: rgba(195,69,47,.15); color: var(--chalk); font-weight: 700; }
-  .scorecard .sc-cond { grid-column: 2 / -1; border-radius: 2px; padding: 5px 0; font-weight: 600; font-size: .8rem; }
+  .scorecard { display: grid; grid-template-columns: 45px repeat(4, 1fr); gap: 5px 7px; font-size: .85rem; align-items: center; margin-bottom: 12px; }
+  .sc-row-label { text-align: right; font-weight: 700; color: var(--chalk-dim); font-size: .7rem; text-transform: uppercase; padding-right: 4px; }
+  .sc-cell { border: 1px solid rgba(239,234,224,.14); border-radius: 3px; padding: 6px 0; background: rgba(24,31,34,.5); text-align: center; font-variant-numeric: tabular-nums; }
+  .sc-cell.match { border-color: var(--lichen); background: rgba(156,176,78,.15); color: var(--chalk); font-weight: 700; }
+  .sc-cell.short { border-color: var(--str); background: rgba(195,69,47,.15); color: var(--chalk); font-weight: 700; }
+  .sc-cond-box { grid-column: 5; grid-row: 1 / 4; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; border: 1px solid rgba(239,234,224,.14); border-radius: 3px; background: rgba(24,31,34,.5); text-align: center; font-size: 1rem; font-weight: 700; }
+  .sc-cond-box.match { border-color: var(--lichen); background: rgba(156,176,78,.15); color: var(--lichen); }
+  .sc-cond-box.short { border-color: var(--str); background: rgba(195,69,47,.15); color: var(--str); }
+  .sc-cond-sub { font-size: .65rem; color: var(--chalk-dim); font-weight: 600; text-transform: uppercase; margin-top: 2px; }
 
   .verdict{font-family:'Spectral',Georgia,serif;font-size:.95rem;line-height:1.5;
     border-left:2px solid var(--lichen);padding-left:10px;margin-bottom:10px;min-height:1.4em}
@@ -285,6 +289,9 @@
     .die .face{font-size:1.3rem}
     .die .lab{font-size:.55rem;letter-spacing:.02em}
     .dicerow{gap:5px}
+    .dicerow-label { width: 35px; }
+    .scorecard { grid-template-columns: 35px repeat(4, 1fr); gap: 4px 5px; }
+    .sc-row-label { font-size: .6rem; }
     .log{max-height:150px}
     .ground{font-size:.8rem;padding:10px 0 12px}
     /* keep the roll button within thumb reach while the board is on screen */
@@ -338,13 +345,16 @@
       <div class="panel">
         <h3 id="turnLabel">Turn</h3>
         <div class="targetbox" id="targetbox">Pick a hold to try for.</div>
+        
         <div class="dicerow">
+          <div class="dicerow-label">Roll</div>
           <div class="die s"><div class="face" id="f0">–</div><div class="lab">strength</div></div>
           <div class="die e"><div class="face" id="f1">–</div><div class="lab">endurance</div></div>
           <div class="die t"><div class="face" id="f2">–</div><div class="lab">technique</div></div>
           <div class="die c"><div class="face" id="f3">–</div><div class="lab">conditions</div></div>
         </div>
         <div id="breakdown" hidden></div>
+        
         <div class="ledger" id="ledger" hidden></div>
         <div class="verdict" id="verdict"></div>
         <div class="rollbar"><div class="btnrow">
@@ -1306,7 +1316,7 @@ function evaluate(p,cell,res,blind){
   const mods = effMods(p);
   const per = res.slice(0,3).map((f,i)=>{
     const got = Math.max(0, f.v + mods[i]) + boosts[i];
-    return {got, rolled:got, req:reqs[i], miss:0, waived:freeCats[i]};
+    return {rawDie: f.v, got, rolled:got, req:reqs[i], miss:0, waived:freeCats[i]};
   });
   const remiss = ()=>per.forEach(d=>{ d.miss = d.waived ? 0 : Math.max(0, d.req - d.got); });
   remiss();
@@ -1350,32 +1360,50 @@ const affordable = (p,n) => payment(p,n)===0 || p.water > payment(p,n);
 
 function showBreakdown(ev){
   const cls = ['var(--str)','var(--end)','var(--tec)'];
-  const names = ['STR', 'END', 'TEC'];
   
   let html = `<div class="scorecard">`;
-  html += `<div></div><div class="sc-head">Need</div><div class="sc-head">Rolled</div><div class="sc-head">Got</div>`;
   
-  ev.per.forEach((d, i) => {
-    const status = d.waived ? 'match' : (d.miss ? 'short' : 'match');
+  // Create Condition Box HTML which will span rows 1-3
+  let condHtml = `<div class="sc-cond-box" style="border:none;background:transparent;"></div>`;
+  if(ev.cond){
+    const good = ev.cond==='drop' || ev.cond==='plus' || (ev.cond==='minus' && ev.condAbsorbed);
+    let txt = '', sub = '';
+    if(ev.cond==='plus') { txt = '+1'; sub = ev.condTarget!==null ? STATNAMES[ev.condTarget].slice(0,3) : 'WASTED'; }
+    else if(ev.cond==='minus') { txt = '\u22121'; sub = ev.condTarget!==null ? STATNAMES[ev.condTarget].slice(0,3) : ''; }
+    else if(ev.cond==='drop') { txt = '+1'; sub = 'DROP'; }
+    else if(ev.cond==='slip') { txt = '\u22121'; sub = 'DROP'; }
     
-    html += `<div class="sc-lbl" style="color:${cls[i]}">${names[i]}</div>`;
-    html += `<div class="sc-cell">${d.req}</div>`;
-    html += `<div class="sc-cell">${d.waived ? '-' : d.rolled}</div>`;
-    html += `<div class="sc-cell ${status}">${d.waived ? 'Waived' : d.got}</div>`;
+    condHtml = `<div class="sc-cond-box ${good?'match':'short'}">
+                  <div>${txt}</div>
+                  <div class="sc-cond-sub">${sub}</div>
+                </div>`;
+  }
+
+  // Row 1: Need
+  html += `<div class="sc-row-label">Need</div>`;
+  ev.per.forEach((d) => {
+    html += `<div class="sc-cell">${d.waived ? '-' : d.req}</div>`;
+  });
+  html += condHtml; // Inject the condition box (it spans rows via CSS)
+  
+  // Row 2: Buffs (Total difference between the raw die and the final output)
+  html += `<div class="sc-row-label">Buffs</div>`;
+  ev.per.forEach((d, i) => {
+    if(d.waived) {
+      html += `<div class="sc-cell">-</div>`;
+    } else {
+      const buff = d.got - d.rawDie;
+      const sign = buff > 0 ? '+' : '';
+      html += `<div class="sc-cell" style="color:${cls[i]}">${sign}${buff}</div>`;
+    }
   });
   
-  if(ev.cond){
-    const who = ev.condTarget!==null ? STATNAMES[ev.condTarget].slice(0,3).toUpperCase() : '';
-    const txt = ev.cond==='plus' ? (ev.condTarget!==null?`+1 ${who}`:'+1 wasted')
-      : ev.cond==='minus' ? (ev.condTarget!==null?`\u22121 ${who}`:'\u22121')
-      : (ev.cond==='drop' ? 'Drink (+1 drop)' : 'Slip (-1 drop)');
-    const good = ev.cond==='drop' || ev.cond==='plus' || (ev.cond==='minus' && ev.condAbsorbed);
-    
-    const condStyle = `border: 1px solid ${good ? 'var(--lichen)' : 'var(--str)'}; background: ${good ? 'rgba(156,176,78,.15)' : 'rgba(195,69,47,.15)'}; color: ${CONDCOL[ev.cond]};`;
-    
-    html += `<div class="sc-lbl" style="color:var(--chalk-dim)">COND</div>`;
-    html += `<div class="sc-cond" style="${condStyle}">${txt}</div>`;
-  }
+  // Row 3: Got
+  html += `<div class="sc-row-label">Got</div>`;
+  ev.per.forEach((d) => {
+    const status = d.waived ? 'match' : (d.miss ? 'short' : 'match');
+    html += `<div class="sc-cell ${status}">${d.waived ? 'Waived' : d.got}</div>`;
+  });
   
   html += `</div>`;
   document.getElementById('breakdown').innerHTML = html;
