@@ -362,7 +362,7 @@
           <button class="primary alt" id="btnBail" hidden>Back off</button>
           <button class="primary alt" id="btnDeclare" hidden>Call the onsight</button>
           <button class="primary alt" id="btnScout" hidden>Scout a hold</button>
-          <button class="primary alt" id="btnPass" hidden>Chalk up, regain 1</button>
+          <button class="primary alt" id="btnPass" hidden>Chalk up, regain 2</button>
         </div></div>
       </div>
 
@@ -396,23 +396,23 @@
             <li>Once a climber has topped out, everyone else gets one last turn. On that turn only, anyone two or more rows below the summit may lunge, attempting a hold two rows straight up for the row toll plus 1 drop. So from row 3 you still have a shot at the top, and from row 2 you are genuinely out of it.</li>
             <li>Move up into either hold above you, or sideways along your row. No downclimbing. One climber per hold, except the rest ledge and except a Poacher, who can take an occupied hold and swap places with the climber on it.</li>
             <li>Rows 1 and 2 are free to reach for. From row 3 up, every attempt costs 1 drop before the dice, win or lose. If that drop alone would empty you, the hold is out of reach and you must rest first.</li>
-            <li>Then roll. Three category dice, each showing 0, 1, 1, 2, 2, 3, plus one condition die rolled with them. A face-down hold turns over after the roll, and one point of shortfall is forgiven for climbing blind.</li>
+            <li>Then roll. Three category dice, each showing 0, 1, 1, 2, 2, 3, plus one condition die rolled with them. A face-down hold turns over after the roll.</li>
             <li>The condition die has six faces: +1, &minus;1, &minus;1, drop, drop, slip. Both act on ONE category, never on your total. The +1 goes where you are furthest short, your choice. The &minus;1 is not your choice: it lands on the category the hold demands MOST, the crux of the move, so you only escape it if you happened to overshoot there. A drop returns 1 water, a slip costs 1.</li>
             <li>A requirement of 3 needs a rolled 3, or a 2 with a +1. Chalk counts as a flat 2 and ignores your modifiers. A -1 in a category makes a 3 there impossible to match, so you will always pay something on those holds.</li>
             <li>Each hold type comes in several versions with different numbers, keeping one signature category fixed. A flat edge might be 2/1/1, 1/2/1 or 1/1/2, so the name tells you the family, never the exact demand.</li>
-            <li>The deck demands each category about equally, 40/42/42 in total, and most holds need 2 or more in at least two categories. A single buff cannot clear a hold on its own. A 0 means that category is free on that tile.</li>
             <li>Character boosts add 1 to a category, after the hold is face up, once per attempt.</li>
+            <li>Missing by 1 is considered a success and costs nothing.</li>
+            <li>Missing by 2 gives you a choice. Take the hold and pay 2 drops, or back off for 1 drop and stay where you are.</li>
+            <li>Missing by 3 or more means you are too far gone to back off. You must commit.</li>
             <li>If the shortfall from your roll is equal to or greater than your remaining drops, you pass the Point of No Return and cannot back off. You must commit and take the fall.</li>
-            <li>If you can still afford it, missing 1 or 2 gives you a choice. Take the hold and pay a drop per point, or back off for 1 drop and stay where you are.</li>
-            <li>Matched everything: take it free. Short by any amount: pay 1 drop per point to force the move, or pay 1 drop to back off and stay where you are. The hold stays face up either way.</li>
-            <li>A rest ledge returns 2 drops when you establish it. Chalking up on your turn instead of climbing returns 1, or 2 if nothing above you is free. You may only chalk up once; consecutive rests are not allowed.</li>
+            <li><b>The Reimbursement Rule:</b> If you attempt an unexplored hold that is vertically above you, and you successfully establish it, you are refunded the height toll you paid to reach it.</li>
+            <li>A rest ledge returns 2 drops when you establish it. Chalking up on your turn instead of climbing returns 2 drops. You may only chalk up ONCE per game.</li>
             <li>Drops leave you in exactly four places: the row toll before the dice, a slip on the condition die, forcing a move you came up short on, and backing off. Rows 1 and 2 have no toll at all.</li>
             <li>Running out of water is the ONLY way to come off the wall. It can happen from the height toll, from forcing a move, or from backing off. Water symbols are counted first, so they can save you.</li>
             <li>When you empty your water you drop 2 rows, landing on that hold in your column and turning it face up, then refill to full. Below row 3 that means the ground. If the landing hold is taken you drop another row.</li>
             <li>Play solo against the route with 3 lives, or with up to four climbers sharing one screen, any mix of people and CPU. Pass the device when the panel tells you to.</li>
             <li>Climbers race the same crag. Who leads is random each route. Climbers later in the order may start with extra drops above their ceiling, tuned per route, because turn order is worth different amounts on a short boulder problem and on a big wall.</li>
             <li>That head start sits ABOVE your ceiling. The mat has 8 drop counters, but only the first 5 can ever be recovered, marked by the red line. Spend the extras and they are gone, and a pump-out refills you to 5 like everyone else.</li>
-            <li>With four on the wall you will get blocked. If nothing above you is free, resting recovers 2 drops instead of 1, so waiting out the traffic builds you a bigger tank.</li>
             <li>When a climber tops out, everyone else gets one last turn to match it. If more than one tops out, most water left wins, then most first ascents.</li>
           </ul>
         </details>
@@ -479,7 +479,7 @@ const ABILITIES = [
   {id:'beta',    n:'Beta Reader', band:'per attempt',
    t:'Once per attempt, reroll one die that came up short.'},
   {id:'dynamic', n:'Dynamic Mover', band:'always',
-   t:'When you are short by exactly 1, force the move for free.'},
+   t:'When you are short by exactly 2, force the move for 1 drop instead of 2.'},
   {id:'efficient', n:'Efficient', band:'always',
    t:'Backing off an attempt costs you nothing.'},
   {id:'traverse', n:'Traverser', band:'always',
@@ -654,7 +654,7 @@ function makePlayer(ch,ability,isBot){
           areteHolds:new Set(), lungRows:new Set(),
           water:tank, max:tank, seatBonus:0,
           pos:null, fas:0, falls:0, topped:false, finalDone:false,
-          restedLastTurn: false};
+          chalkUps: 1};
 }
 
 function newCrag(){
@@ -1032,8 +1032,8 @@ function drawTurn(){
         : `<br><span style="color:var(--chalk-dim)">Low enough to reach for free.</span>`);
   const after = p.water - exp;
   const risk = after <= RULES.failCost
-    ? `<br><span style="color:var(--str)">WARNING: after the toll you will hold ${after} drop${after===1?'':'s'}. Anything but a clean latch empties you, and you will drop ${RULES.fallRows} rows.</span>`
-    : `<br><span style="color:var(--chalk-dim)">Come up short and you choose: pay a drop per point to force it, or ${RULES.failCost} drop to back off. Empty your water and you drop ${RULES.fallRows} rows.</span>`;
+    ? `<br><span style="color:var(--str)">WARNING: after the toll you will hold ${after} drop${after===1?'':'s'}. A bad roll empties you, and you will drop ${RULES.fallRows} rows.</span>`
+    : `<br><span style="color:var(--chalk-dim)">Come up short by 2 and you choose: pay 2 drops to force it, or ${RULES.failCost} drop to back off. Empty your water and you drop ${RULES.fallRows} rows.</span>`;
   if(cell.up){
     const mods = effMods(p);
     const eff = effReqs(cell.hold, target.r);
@@ -1047,8 +1047,12 @@ function drawTurn(){
       : `<b>${cell.hold.n}</b>needs ${line}.
       <br><span style="font-family:Spectral,serif;font-style:italic">${cell.hold.f}</span>${bonus}${cost}${risk}`;
   } else {
-    tb.innerHTML = `<b>Face-down hold</b>You are climbing blind. Your first point of
-      shortfall is forgiven, and latching it banks a first ascent.${bonus}${cost}${risk}`;
+    let blindTxt = `<b>Face-down hold</b>You are climbing blind.`;
+    if (target.r > (p.pos ? p.pos.r : -1) && RULES.exposure(target.r) > 0) {
+        blindTxt += ` <span style="color:var(--lichen)">Latching this above you will refund the height toll.</span>`;
+    }
+    blindTxt += ` Latching it banks a first ascent.${bonus}${cost}${risk}`;
+    tb.innerHTML = blindTxt;
   }
 }
 
@@ -1102,18 +1106,17 @@ function updateControls(){
   sc.textContent = scoutMode ? 'Cancel scouting' : 'Scout a hold';
   
   pass.hidden = !!target;
-  if (p.restedLastTurn) {
-    const stuck = legalMoves(p).length === 0;
-    if (stuck) {
+  if (p.chalkUps <= 0) {
+    if (legalMoves(p).length === 0) {
         pass.disabled = false;
         pass.textContent = 'Stuck! Pump out and fall';
     } else {
         pass.disabled = true;
-        pass.textContent = 'Already chalked up last turn';
+        pass.textContent = 'No chalk ups left';
     }
   } else {
     pass.disabled = false;
-    pass.textContent = `Chalk up, regain ${blockedUp(p) ? 2 : 1}`;
+    pass.textContent = `Chalk up, regain 2 drops`;
   }
 
   roll.textContent = 'Roll for the hold';
@@ -1140,7 +1143,7 @@ function logAttempt(p, ev, faces, moved, net){
     ? ledger.map(e=>`${e.label} ${e.delta>0?'+':''}${e.delta}`).join(' &middot; ')
     : 'nothing spent';
   const outcome = moved
-    ? (ev.net===0 ? 'took the hold for free' : `took the hold and lost ${payment(p,ev.net)} drop${payment(p,ev.net)>1?'s':''}`)
+    ? (payment(p,ev.net)===0 ? 'took the hold for free' : `took the hold and lost ${payment(p,ev.net)} drop${payment(p,ev.net)>1?'s':''}`)
     : `backed off and lost ${p.ability.id==='efficient'?0:RULES.failCost} drop`;
   const rows = [
     `<span class="ehead"><b>${p.ch.n}</b> row ${a.row+1} &middot; ${a.hold}${a.blind?' <em>(blind)</em>':''}</span>`,
@@ -1148,8 +1151,6 @@ function logAttempt(p, ev, faces, moved, net){
       ev.net===0 ? 'nothing missing' : ev.net+' missing'}</span>`
   ];
   if(ev.cond) rows.push(`<span class="eline econd" style="color:${CONDCOL[ev.cond]}">conditions: ${condStory(ev)}</span>`);
-  if(ev.forgive && ev.raw > 0)
-    rows.push(`<span class="eline eblind">unexplored, so 1 less to find: ${ev.raw} becomes ${ev.net}</span>`);
   if(a.abilities.length) rows.push(`<span class="eline eabil">${a.abilities.join(' &middot; ')}</span>`);
   rows.push(`<span class="eline emoney">${money} &nbsp;&rarr;&nbsp; ${Math.max(0,p.water)} of ${p.max}</span>`);
   rows.push(`<span class="eline eout">${outcome}</span>`);
@@ -1362,14 +1363,15 @@ function evaluate(p,cell,res,blind){
   }
 
   const raw = per.reduce((s,d)=>s+d.miss, 0);
-  const forgive = blind ? 1 : 0;
+  const forgive = 0; // Removed blind forgiveness
   return {per, cats, cond, condTarget, condAbsorbed, raw, forgive, net: Math.max(0, raw - forgive)};
 }
 
 /* drops needed to force a move that is n points short */
 function payment(p,n){
-  if(n===0) return 0;
-  return (n===1 && p.ability.id==='dynamic') ? 0 : n;
+  if(n<=1) return 0;
+  if(n===2 && p.ability.id==='dynamic') return 1;
+  return n;
 }
 const affordable = (p,n) => payment(p,n)===0 || p.water > payment(p,n);
 
@@ -1437,13 +1439,17 @@ function previewVerdict(){
   if(comesOff(p, ev))
     bits.push(`You are ${n} off and fighting it would cost ${pay} drops you do not have. You come off and drop ${RULES.fallRows} rows.`);
   else if(n===0) bits.push('You matched every category. Take the hold for free.');
-  else if(pay===0) bits.push('You are 1 off, but a dynamic move covers it. Take the hold for free.');
+  else if(n===1) bits.push('You are 1 off, which is close enough. Take the hold for free.');
   else if(mustCommit(p, ev))
     bits.push(`You are ${n} off. That is too far gone or too expensive to climb back down, so you must fight for it and lose ${pay} drops.`);
   else bits.push(`You are ${n} off. Take the hold and lose ${pay} drop${pay>1?'s':''}, or back off and lose ${RULES.failCost}.`);
   if(ev.cond==='plus' || ev.cond==='minus') bits.push(condStory(ev).charAt(0).toUpperCase()+condStory(ev).slice(1)+'.');
   if(ev.cond==='slip') bits.push('You will slip and lose a drop whatever you choose.');
-  if(attemptBlind && ev.raw>0) bits.push(`${ev.forgive} point${ev.forgive>1?'s':''} forgiven for climbing blind.`);
+  
+  if(attemptBlind && target.r > (p.pos ? p.pos.r : -1) && RULES.exposure(target.r) > 0) {
+      bits.push('Latching this unexplored hold will refund its height toll.');
+  }
+
   const cats = tappableDice(p);
   if(cats.length) bits.push(`Tap ${cats.map(i=>STATNAMES[i]).join(' or ')} to ${dieOption(p).label}.`);
   setVerdict(bits.join(' '));
@@ -1554,14 +1560,28 @@ function climbIt(){
   const pay = payment(p,n);
   if(!affordable(p,n)) return;
   const v = [];
+  
   if(n===0) v.push(`Latched the ${cell.hold.n.toLowerCase()} clean.`);
-  else if(pay===0){ note('dynamic move, short by 1', 0); noteAbility('dynamic mover: short by 1, paid nothing'); v.push(`Short by 1, but a dynamic move covers it for nothing.`); }
+  else if(n===1){ note('missed by 1, free', 0); v.push(`Short by 1, but close enough to latch it for nothing.`); }
+  else if(pay===1 && p.ability.id==='dynamic'){ note('dynamic move', -1); noteAbility('dynamic mover: short by 2, paid 1'); v.push(`Short by 2, but a dynamic move reduces the cost to 1.`); p.water -= 1; }
   else { p.water -= pay; note(`${n} missing`, -pay); v.push(`You were ${n} off on the ${cell.hold.n.toLowerCase()} and paid ${pay} drop${pay>1?'s':''} to hold it anyway.`); }
 
   let onsightGain = 0;
   if(onsightDeclared){
     if(n===0){ onsightGain = 2; v.push('Onsight called and delivered. 2 drops back.'); note('onsight delivered', 2); noteAbility('onsighter: delivered'); }
     else { p.water -= 2; v.push('The onsight is blown. 2 drops gone.'); note('onsight blown', -2); noteAbility('onsighter: blown'); }
+  }
+
+  // Reimbursement rule
+  let blindRefund = 0;
+  const toll = RULES.exposure(r);
+  if (attemptBlind && r > (p.pos ? p.pos.r : -1) && toll > 0) {
+      const usedGrip = attemptInfo.abilities.some(a => a.includes('iron grip'));
+      if (!usedGrip) {
+          blindRefund = toll;
+          v.push(`Blind push successful: ${toll} drop height toll refunded.`);
+          note('blind push refund', blindRefund);
+      }
   }
 
   const victim = occupant(r,c,p);
@@ -1574,7 +1594,8 @@ function climbIt(){
   p.pos = {r,c};
   if(attemptBlind) p.fas++;
   if(cell.hold.rest){ v.push(`A ledge like this returns ${cell.hold.rest} drops.`); note('rest ledge', cell.hold.rest); }
-  finishAttempt(v, true, (cell.hold.rest || 0) + onsightGain);
+  
+  finishAttempt(v, true, (cell.hold.rest || 0) + onsightGain + blindRefund);
 }
 
 function backOff(){
@@ -1599,14 +1620,11 @@ function finishAttempt(v, moved, restGain, forceFall){
   const p = players[cur];
   const r = target.r;
 
-  // The attempt resolves, so the consecutive rest restriction resets
-  p.restedLastTurn = false;
-
   const regain = restGain;   /* the condition die already settled when the dice landed */
   if(regain){
     const before = Math.max(0,p.water);
     p.water = Math.max(p.water, Math.min(p.max, p.water + regain));   /* never claws back a head start */
-    if(p.water > before) v.push(`The ledge returned ${p.water-before} drop${p.water-before>1?'s':''}.`);
+    if(p.water > before) v.push(`The climb returned ${p.water-before} drop${p.water-before>1?'s':''}.`);
   }
 
   if(forceFall || p.water <= 0){
@@ -1694,42 +1712,27 @@ function nextTurn(){
   if(players[cur].isBot) later(botTurn, 550);
 }
 
-/* nothing above you free? then you are stuck below traffic */
-function blockedUp(p){
-  const mv = legalMoves(p);
-  if(!p.pos) return mv.length === 0;
-  return !mv.some(m=>m.r > p.pos.r);
-}
-
 function passTurn(){
   const p = players[cur];
   
-  if (p.restedLastTurn) {
-    // Forced fall if clicking the button when softlocked
+  if (p.chalkUps <= 0) {
     say(`<b>${p.ch.n}</b> is completely stuck and pumps out.`);
-    p.restedLastTurn = false;
     finishAttempt(['No moves available and cannot rest.'], false, 0, true);
     return;
   }
   
-  const stuck = blockedUp(p);
-  const gain = stuck ? 2 : 1;
+  p.chalkUps--;
+  const gain = 2;
   const w0 = p.water;
   p.delta = null;
   p.water = Math.max(p.water, Math.min(p.max, p.water + gain));
   ledger = [];
   
-  p.restedLastTurn = true;
-  
-  note(stuck ? 'rest under traffic' : 'chalk up', gain);
+  note('chalk up', gain);
   p.delta = p.water - w0;
   drawLedger(p.delta, p.water, p.max);
-  say(stuck
-    ? `<b>${p.ch.n}</b> is stuck under traffic and takes a proper rest, ${gain} drops back.`
-    : `<b>${p.ch.n}</b> chalked up and shook out, one drop back.`);
-  setVerdict(stuck
-    ? `Nothing above you is free, so you settle in and recover ${gain} drops instead of 1.`
-    : `${p.ch.n} rested instead of climbing, regaining one drop.`);
+  say(`<b>${p.ch.n}</b> chalked up and shook out, ${gain} drops back.`);
+  setVerdict(`${p.ch.n} rested instead of climbing, regaining ${gain} drops. No chalk ups remaining.`);
   target = null;
   drawAll();
   nextTurn();
@@ -1754,11 +1757,12 @@ function scoreMove(p,m){   /* lower is better */
     expected = effReqs(cell.hold, m.r)
       .reduce((s,q,i)=> s + Math.max(0, q - (1.67 + mods[i])), 0);
   } else {
-    expected = Math.max(0, hiddenExpected(p) - 1)
-             + (m.r === ROWS-1 ? RULES.lipBonus : 0);   /* blind, one point forgiven, plus the lip */
+    expected = Math.max(0, hiddenExpected(p))
+             + (m.r === ROWS-1 ? RULES.lipBonus : 0);   /* No blind forgiveness */
   }
   let cost = toll + expected;
   if(!cell.up) cost -= 0.4;                                        /* exploring is worth something */
+  if(!cell.up && m.r > (p.pos ? p.pos.r : -1) && toll > 0) cost -= toll; /* Upward reimbursement factored into CPU logic */
   if(cell.up && cell.hold.rest && p.water < p.max-1) cost -= 1.8;   /* go and drink */
   if(p.ability.id==='arete' && onArete(m.c)) cost -= 0.6;
   if(p.ability.id==='onsight' && p.charges>0 && !cell.up) cost -= 0.3;
@@ -1818,9 +1822,8 @@ function botTurn(){
   }
   const moves = legalMoves(p);
   if(!moves.length){ 
-    if (p.restedLastTurn) {
+    if (p.chalkUps <= 0) {
         say(`<b>${p.ch.n}</b> is completely stuck and pumps out.`);
-        p.restedLastTurn = false;
         finishAttempt(['No moves available and cannot rest.'], false, 0, true);
         return;
     }
@@ -1828,7 +1831,7 @@ function botTurn(){
   }
   const ranked = moves.map(m=>({m, s:scoreMove(p,m)})).sort((a,b)=>a.s-b.s);
   const best = ranked[0];
-  if(p.water <= 2 && best.s > 2.4 && p.pos && !p.restedLastTurn){ passTurn(); return; }
+  if(p.water <= 2 && best.s > 2.4 && p.pos && p.chalkUps > 0){ passTurn(); return; }
   target = best.m;
   attemptReach = spanKind(p, target.r, target.c);   /* same flag the human path sets */
   attemptBlind = !board[target.r][target.c].up;
