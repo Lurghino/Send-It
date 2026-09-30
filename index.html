@@ -167,7 +167,8 @@
   button.primary.alt:hover:not(:disabled){background:rgba(195,69,47,.2);border-color:var(--str)}
 
   /* ---------- player mats (Compact Ribbon) ---------- */
-  .matband{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;}
+  .main-stage { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 20px; align-items: start; }
+  .matband{display:flex; flex-direction:column; gap:10px;}
   .mat{border:1px solid rgba(239,234,224,.16);border-top:3px solid var(--pc);
     background:linear-gradient(180deg,rgba(35,46,51,.96),rgba(22,29,32,.96));
     border-radius:4px;padding:6px 8px;position:relative;
@@ -260,7 +261,8 @@
 
   /* ---------- responsive ---------- */
   @media (max-width:850px){
-    .matband { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .main-stage { grid-template-columns: 1fr; gap: 14px; }
+    .matband { grid-template-columns: repeat(2, minmax(0, 1fr)); display: grid; }
   }
 
   /* ---------- phone ---------- */
@@ -306,24 +308,29 @@
     </div>
   </header>
 
-  <!-- ============ 2. Maps ============ -->
-  <div class="panel map-panel">
-    <div class="cragwrap">
-      <div style="display:flex;gap:4px;justify-content:center">
-        <div class="gradeCol" id="grades"></div>
-        <div class="board" id="board"></div>
+  <!-- ============ 2. Map & 3. Player Mats (Side-by-Side) ============ -->
+  <div class="main-stage">
+    <div class="panel map-panel">
+      <div class="cragwrap">
+        <div style="display:flex;gap:4px;justify-content:center">
+          <div class="gradeCol" id="grades"></div>
+          <div class="board" id="board"></div>
+        </div>
+        <div class="boardnote" id="boardnote"></div>
+        <div class="ground" id="ground">the ground — start here</div>
       </div>
-      <div class="boardnote" id="boardnote"></div>
-      <div class="ground" id="ground">the ground — start here</div>
     </div>
+    
+    <div id="mats" class="matband"></div>
   </div>
 
-  <!-- ============ 3. Interactive Die Roll Area (Compact) ============ -->
+  <!-- ============ 4. Interactive Die Roll Area (Compact) ============ -->
   <div class="panel attempt-panel" id="colAttempt">
     <h3 id="turnLabel" style="margin-bottom:4px;">Turn</h3>
     <div class="targetbox" id="targetbox">Pick a hold to try for.</div>
     
     <div class="dicerow">
+      <div class="dicerow-label">Roll</div>
       <div class="die s"><div class="lab">STR</div><div class="face" id="f0">–</div></div>
       <div class="die e"><div class="lab">END</div><div class="face" id="f1">–</div></div>
       <div class="die t"><div class="lab">TEC</div><div class="face" id="f2">–</div></div>
@@ -341,9 +348,6 @@
       <button class="primary alt" id="btnPass" hidden>Chalk up, regain 2</button>
     </div></div>
   </div>
-
-  <!-- ============ 4. Mats (Compact) ============ -->
-  <div id="mats" class="matband"></div>
 
   <!-- ============ 5. Narrative Log ============ -->
   <div class="panel log-panel">
@@ -375,7 +379,8 @@
         <li>The crag is one shuffled deck, dealt face down at random. No difficulty gradient, no guaranteed rest ledge.</li>
         <li>What remains hidden is public knowledge, since the deck is fixed. You can count what is left, but never where it is.</li>
         <li>Move up into either hold above you, or sideways along your row. No downclimbing. One climber per hold, except the rest ledge and except a Poacher, who can take an occupied hold and swap places with the climber on it.</li>
-        <li>Rows 1 and 2 are free to reach for. From row 3 up, every attempt costs 1 drop before the dice, win or lose. If that drop alone would empty you, the hold is out of reach and you must rest first.</li>
+        <li>Rows 1 and 2 are free to reach for. From row 3 up, every attempt costs a 1-drop height toll before the dice, win or lose.</li>
+        <li><b>Running on Fumes:</b> The height toll can never take your final drop of water. If paying the toll would drop you to 0, it is automatically reduced so you keep 1 drop to roll the dice with.</li>
         <li>Then roll. Three category dice, each showing 0, 1, 1, 2, 2, 3, plus one condition die rolled with them. A face-down hold turns over after the roll.</li>
         <li>The condition die has six faces: +1, &minus;1, &minus;1, drop, drop, slip. Both act on ONE category, never on your total. The +1 goes where you are furthest short, your choice. The &minus;1 is not your choice: it lands on the category the hold demands MOST, the crux of the move, so you only escape it if you happened to overshoot there. A drop returns 1 water, a slip costs 1.</li>
         <li>A requirement of 3 needs a rolled 3, or a 2 with a +1. Chalk counts as a flat 2 and ignores your modifiers. A -1 in a category makes a 3 there impossible to match, so you will always pay something on those holds.</li>
@@ -397,6 +402,7 @@
       <ul>
         <li>A rest ledge returns 2 drops when you establish it.</li>
         <li>Chalking up on your turn instead of climbing returns 2 drops. You may only chalk up <b>ONCE</b> per game.</li>
+        <li><b>Traffic Jam Rest:</b> If all holds directly above you are occupied by other climbers, you are blocked. You may pass your turn to rest and regain 2 drops. This does NOT consume your 1-per-game Chalk Up.</li>
         <li>Drops leave you in exactly four places: the row toll before the dice, a slip on the condition die, forcing a move you came up short on, and backing off. Rows 1 and 2 have no toll at all.</li>
         <li>Running out of water is the ONLY way to come off the wall. It can happen from the height toll, from forcing a move, or from backing off. Water symbols are counted first, so they can save you.</li>
         <li>When you empty your water you drop 2 rows, landing on that hold in your column and turning it face up, then refill to full. Below row 3 that means the ground. If the landing hold is taken you drop another row.</li>
@@ -767,13 +773,22 @@ function neighbours(p){
     reachRing(p.pos).forEach(m=>{ if(!out.some(o=>o.r===m.r&&o.c===m.c)) out.push(m); });
   return out;
 }
-/* you cannot reach for a hold if the height toll alone would empty you */
 /* can a falling climber land here? */
 function canLand(p,r,c){
   const o = occupant(r,c,p);
   if(!o) return true;
   const cell = board[r][c];
   return !!(cell.up && cell.hold.rest);
+}
+
+/* Check if player is completely blocked by climbers vertically */
+function isTrafficJammed(p){
+  if(!p.pos || p.pos.r >= ROWS-1) return false;
+  const r = p.pos.r, c = p.pos.c;
+  const a = (r%2===0) ? [c-1,c] : [c,c+1];
+  const valid = a.filter(cc=>cc>=0 && cc<COLS);
+  if(!valid.length) return false;
+  return valid.every(cc => occupant(r+1, cc, p));
 }
 
 /* what this climber actually pays to reach for a given hold */
@@ -783,10 +798,10 @@ function attemptCost(p,r,c){
   if(!t) return 0;
   if(p.ability.id==='traverse' && p.pos && r===p.pos.r) return 0;   /* sideways is free */
   if(p.ability.id==='grip' && p.charges>0) return 0;                /* iron grip absorbs it */
-  return t;
+  return Math.min(t, Math.max(0, p.water - 1));                     /* Running on fumes rule */
 }
 
-/* you cannot reach for a hold if the toll alone would empty you */
+/* you cannot reach for a hold if the toll alone would empty you (handled by Fumes cap now) */
 function legalMoves(p){
   return neighbours(p).filter(n=>canEnter(p,n.r,n.c) && p.water > attemptCost(p,n.r,n.c));
 }
@@ -1006,7 +1021,9 @@ function drawTurn(){
     return;
   }
   const cell = board[target.r][target.c];
-  const exp = attemptCost(p, target.r, target.c);
+  let rawToll = RULES.exposure(target.r) + (attemptReach ? RULES.reachToll : 0);
+  let exp = attemptCost(p, target.r, target.c);
+  
   const notes = [];
   if(p.ability.id==='arete' && onArete(target.c) && p.charges>0)
     notes.push(`Arête Specialist: after the roll, add 1 to any one category. ${p.charges} left.`);
@@ -1020,16 +1037,27 @@ function drawTurn(){
     notes.push(`Poacher: establish this and ${held.ch.n} is knocked to the ground.`);
   const bonus = notes.length
     ? `<br><span style="color:var(--lichen)">${notes.join(' ')}</span>` : '';
-  const listed = RULES.exposure(target.r);
-  const cost = exp
-    ? `<br><span style="color:var(--str)">Above halfway: ${exp} drop${exp>1?'s':''} spent just to reach for it.</span>`
-    : (listed
-        ? `<br><span style="color:var(--lichen)">Your ability covers the ${listed}-drop toll here.</span>`
-        : `<br><span style="color:var(--chalk-dim)">Low enough to reach for free.</span>`);
+  
+  let costHtml = '';
+  if (p.ability.id === 'traverse' && p.pos && target.r === p.pos.r) {
+      costHtml = `<br><span style="color:var(--lichen)">Traverser: Sideways move is free.</span>`;
+  } else if (rawToll > 0 && p.ability.id === 'grip' && p.charges > 0) {
+      costHtml = `<br><span style="color:var(--lichen)">Iron Grip covers the ${rawToll}-drop toll here.</span>`;
+  } else if (rawToll > 0) {
+      if (exp < rawToll) {
+          costHtml = `<br><span style="color:var(--str)">Running on fumes! Toll reduced from ${rawToll} to ${exp} to keep 1 drop.</span>`;
+      } else {
+          costHtml = `<br><span style="color:var(--str)">Height toll: ${exp} drop${exp>1?'s':''} spent just to reach for it.</span>`;
+      }
+  } else {
+      costHtml = `<br><span style="color:var(--chalk-dim)">Low enough to reach for free.</span>`;
+  }
+
   const after = p.water - exp;
   const risk = after <= RULES.failCost
     ? `<br><span style="color:var(--str)">WARNING: after the toll you will hold ${after} drop${after===1?'':'s'}. A bad roll empties you, and you will drop ${RULES.fallRows} rows.</span>`
     : `<br><span style="color:var(--chalk-dim)">Come up short by 2 and you choose: pay 2 drops to force it, or ${RULES.failCost} drop to back off. Empty your water and you drop ${RULES.fallRows} rows.</span>`;
+  
   if(cell.up){
     const mods = effMods(p);
     const eff = effReqs(cell.hold, target.r);
@@ -1041,13 +1069,13 @@ function drawTurn(){
     tb.innerHTML = cell.hold.rest
       ? `<b>${cell.hold.n}</b>Nothing to match. Take it for free and drink ${cell.hold.rest} drops.`
       : `<b>${cell.hold.n}</b>needs ${line}.
-      <br><span style="font-family:Spectral,serif;font-style:italic">${cell.hold.f}</span>${bonus}${cost}${risk}`;
+      <br><span style="font-family:Spectral,serif;font-style:italic">${cell.hold.f}</span>${bonus}${costHtml}${risk}`;
   } else {
     let blindTxt = `<b>Face-down hold</b>You are climbing blind.`;
     if (target.r > (p.pos ? p.pos.r : -1) && RULES.exposure(target.r) > 0) {
         blindTxt += ` <span style="color:var(--lichen)">Latching this above you will refund the height toll.</span>`;
     }
-    blindTxt += ` Latching it banks a first ascent.${bonus}${cost}${risk}`;
+    blindTxt += ` Latching it banks a first ascent.${bonus}${costHtml}${risk}`;
     tb.innerHTML = blindTxt;
   }
 }
@@ -1102,7 +1130,12 @@ function updateControls(){
   sc.textContent = scoutMode ? 'Cancel scouting' : 'Scout a hold';
   
   pass.hidden = !!target;
-  if (p.chalkUps <= 0) {
+  const jammed = isTrafficJammed(p);
+  
+  if (jammed) {
+      pass.disabled = false;
+      pass.textContent = `Traffic! Free rest (regain 2)`;
+  } else if (p.chalkUps <= 0) {
     if (legalMoves(p).length === 0) {
         pass.disabled = false;
         pass.textContent = 'Stuck! Pump out and fall';
@@ -1480,27 +1513,38 @@ function doRoll(){
 
   if(attemptReach === 'card' && p.charges > 0){
     p.charges--;
-  
   }
+  
   ledger = [];
   startWater = p.water;
   p.delta = null;
-  const exp = attemptCost(p, target.r, target.c);
-  const listed = RULES.exposure(target.r);
-  if(exp){
-    p.water -= exp;
-    note(attemptReach ? 'span toll' : `row ${target.r+1} toll`, -exp);
-    drawMats();
-  } else if(listed && p.ability.id==='grip' && p.charges>0){
-    p.charges--;
-    note('iron grip covered the toll', 0);
-    noteAbility(`iron grip: no toll, ${p.charges} left`);
-    say(`<b>${p.ch.n}</b> grips it out and pays no toll. ${p.charges} left.`);
-    drawMats();
-  } else if(listed && p.ability.id==='traverse'){
-    note('traverse, no toll', 0);
-    noteAbility('traverser: sideways, no toll');
-    say(`<b>${p.ch.n}</b> traverses across for free.`);
+  
+  let exp = attemptCost(p, target.r, target.c);
+  let listed = RULES.exposure(target.r);
+  let span = spanKind(p, target.r, target.c);
+  let rawToll = listed + (span ? RULES.reachToll : 0);
+  
+  if (p.ability.id === 'traverse' && p.pos && target.r === p.pos.r) {
+      note('traverse, no toll', 0);
+      noteAbility('traverser: sideways, no toll');
+      say(`<b>${p.ch.n}</b> traverses across for free.`);
+  } else if (rawToll > 0 && p.ability.id === 'grip' && p.charges > 0) {
+      p.charges--;
+      note('iron grip covered the toll', 0);
+      noteAbility(`iron grip: no toll, ${p.charges} left`);
+      say(`<b>${p.ch.n}</b> grips it out and pays no toll. ${p.charges} left.`);
+      drawMats();
+  } else if (rawToll > 0) {
+      if (exp < rawToll) {
+          p.water -= exp;
+          if (exp > 0) note('fumes toll', -exp);
+          else note('running on fumes', 0);
+          say(`<b>${p.ch.n}</b> is running on fumes! Toll reduced to save the last drop.`);
+      } else {
+          p.water -= exp;
+          note(span ? 'span toll' : `row ${target.r+1} toll`, -exp);
+      }
+      drawMats();
   }
 
   pending = [null,null,null,null];
@@ -1574,8 +1618,8 @@ function climbIt(){
   if (attemptBlind && r > (p.pos ? p.pos.r : -1) && toll > 0) {
       const usedGrip = attemptInfo.abilities.some(a => a.includes('iron grip'));
       if (!usedGrip) {
-          blindRefund = toll;
-          v.push(`Blind push successful: ${toll} drop height toll refunded.`);
+          blindRefund = Math.min(toll, attemptCost(p, r, c)); // Refund Fumes accurately
+          v.push(`Blind push successful: ${blindRefund} drop height toll refunded.`);
           note('blind push refund', blindRefund);
       }
   }
@@ -1715,25 +1759,36 @@ function nextTurn(){
 
 function passTurn(){
   const p = players[cur];
+  const jammed = isTrafficJammed(p);
   
-  if (p.chalkUps <= 0) {
+  if (!jammed && p.chalkUps <= 0) {
     say(`<b>${p.ch.n}</b> is completely stuck and pumps out.`);
     finishAttempt(['No moves available and cannot rest.'], false, 0, true);
     return;
   }
   
-  p.chalkUps--;
+  if (!jammed) {
+    p.chalkUps--;
+  }
+  
   const gain = 2;
   const w0 = p.water;
   p.delta = null;
   p.water = Math.max(p.water, Math.min(p.max, p.water + gain));
   ledger = [];
   
-  note('chalk up', gain);
+  note(jammed ? 'traffic jam rest' : 'chalk up', gain);
   p.delta = p.water - w0;
   drawLedger(p.delta, p.water, p.max);
-  say(`<b>${p.ch.n}</b> chalked up and shook out, ${gain} drops back.`);
-  setVerdict(`${p.ch.n} rested instead of climbing, regaining ${gain} drops. No chalk ups remaining.`);
+  
+  if (jammed) {
+    say(`<b>${p.ch.n}</b> is blocked by traffic and drafts to regain ${gain} drops (free rest).`);
+    setVerdict(`${p.ch.n} rested in traffic, regaining ${gain} drops. Chalk ups preserved.`);
+  } else {
+    say(`<b>${p.ch.n}</b> chalked up and shook out, ${gain} drops back.`);
+    setVerdict(`${p.ch.n} rested instead of climbing, regaining ${gain} drops. ${p.chalkUps} chalk ups remaining.`);
+  }
+  
   target = null;
   drawAll();
   
@@ -1764,7 +1819,7 @@ function scoreMove(p,m){   /* lower is better */
   }
   let cost = toll + expected;
   if(!cell.up) cost -= 0.4;                                        /* exploring is worth something */
-  if(!cell.up && m.r > (p.pos ? p.pos.r : -1) && toll > 0) cost -= toll; /* Upward reimbursement factored into CPU logic */
+  if(!cell.up && m.r > (p.pos ? p.pos.r : -1) && toll > 0) cost -= Math.min(toll, attemptCost(p, m.r, m.c)); /* Upward reimbursement factored into CPU logic */
   if(cell.up && cell.hold.rest && p.water < p.max-1) cost -= 1.8;   /* go and drink */
   if(p.ability.id==='arete' && onArete(m.c)) cost -= 0.6;
   if(p.ability.id==='onsight' && p.charges>0 && !cell.up) cost -= 0.3;
@@ -1823,8 +1878,9 @@ function botTurn(){
     }
   }
   const moves = legalMoves(p);
+  const jammed = isTrafficJammed(p);
   if(!moves.length){ 
-    if (p.chalkUps <= 0) {
+    if (!jammed && p.chalkUps <= 0) {
         say(`<b>${p.ch.n}</b> is completely stuck and pumps out.`);
         finishAttempt(['No moves available and cannot rest.'], false, 0, true);
         return;
@@ -1833,7 +1889,7 @@ function botTurn(){
   }
   const ranked = moves.map(m=>({m, s:scoreMove(p,m)})).sort((a,b)=>a.s-b.s);
   const best = ranked[0];
-  if(p.water <= 2 && best.s > 2.4 && p.pos && p.chalkUps > 0){ passTurn(); return; }
+  if(jammed || (p.water <= 2 && best.s > 2.4 && p.pos && p.chalkUps > 0)){ passTurn(); return; }
   target = best.m;
   attemptReach = spanKind(p, target.r, target.c);   /* same flag the human path sets */
   attemptBlind = !board[target.r][target.c].up;
