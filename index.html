@@ -700,7 +700,7 @@ function newCrag(){
   say(`<b>${MAPS[mapIdx].n}</b>, ${COLS} by ${ROWS}. You are <b>${players[0].ch.n}</b> with <b>${players[0].ability.n}</b>.`);
   say(`Four on the route. Order: ${order}. Climbers later in the order start with a fuller tank.`);
   drawAll(); resetDice();
-  if(players[cur].isBot) later(botTurn, 2500);
+  if(players[cur].isBot) later(botTurn, 1250);
 }
 
 /* ============================================================
@@ -1557,7 +1557,7 @@ function doRoll(){
     else if(attemptReach === 'desperate') attemptInfo.abilities.push('last-turn lunge, two rows straight up');
     lastEval = evaluate(p, cell, pending, attemptBlind);
     showBreakdown(lastEval);
-    if(p.isBot) later(botDecide, 2500);
+    if(p.isBot) later(botDecide, 1250);
     else { phase = 'decide'; markBoostable(); previewVerdict(); updateControls(); }
   });
 }
@@ -1722,7 +1722,7 @@ function finishAttempt(v, moved, restGain, forceFall){
   document.querySelectorAll('.dicerow .die').forEach(d=>d.classList.remove('bumpable'));
   drawAll();
   
-  later(nextTurn, 2500);
+  later(nextTurn, 1250);
 }
 
 /* --------------- turn order --------------- */
@@ -1754,7 +1754,7 @@ function nextTurn(){
   }
   drawAll();
   updateControls();
-  if(players[cur].isBot) later(botTurn, 2500);
+  if(players[cur].isBot) later(botTurn, 1250);
 }
 
 function passTurn(){
@@ -1792,7 +1792,7 @@ function passTurn(){
   target = null;
   drawAll();
   
-  later(nextTurn, 2500);
+  later(nextTurn, 1250);
 }
 
 /* --------------- the CPU climber --------------- */
@@ -1844,14 +1844,14 @@ function botDecide(){
     const wasReroll = opt.kind === 'reroll';
     applyBoost(best);
     /* a reroll spins the die, so come back once the new face has landed */
-    if(wasReroll){ later(botDecide, 1500); return; }
+    if(wasReroll){ later(botDecide, 750); return; }
   }
   const n = lastEval.net;
-  if(comesOff(p, lastEval)){ later(comeOff, 3000); return; }
+  if(comesOff(p, lastEval)){ later(comeOff, 1500); return; }
   const pay = payment(p,n);
   const ceiling = p.water >= 4 ? 3 : 2;
   const climb = pay===0 || mustCommit(p, lastEval) || (affordable(p,n) && pay <= ceiling);
-  later(()=>{ climb ? climbIt() : backOff(); }, 3000);
+  later(()=>{ climb ? climbIt() : backOff(); }, 1500);
 }
 
 /* is spending the tap actually worth it for the bot? */
@@ -1902,7 +1902,7 @@ function botTurn(){
     drawMats();
   }
   drawBoard(); drawTurn(); resetDice();
-  later(doRoll, 2500);
+  later(doRoll, 1250);
 }
 
 /* --------------- wiring --------------- */
