@@ -44,7 +44,8 @@
   a{color:var(--lichen)}
   h1,h2,h3{margin:0;font-weight:600;letter-spacing:.01em}
 
-  .shell{max-width:1100px;margin:0 auto;padding:22px 20px 60px; display: flex; flex-direction: column; gap: 20px;}
+  /* Linear Stack Layout */
+  .shell{max-width:1000px;margin:0 auto;padding:22px 20px 60px; display:flex; flex-direction:column; gap:16px;}
 
   header.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:18px 26px;
     border-bottom:1px solid rgba(239,234,224,.14);padding-bottom:14px;}
@@ -62,71 +63,15 @@
   button.primary{background:var(--lichen);color:#12181A;border-color:var(--lichen);font-size:1.05rem;padding:12px 18px;width:100%}
   button.primary:hover:not(:disabled){background:#B0C563;border-color:#B0C563}
 
-  .matband{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;}
-
   .panel{background:linear-gradient(180deg,rgba(35,46,51,.9),rgba(27,36,40,.9));
-    border:1px solid rgba(239,234,224,.12);border-radius:3px;padding:14px}
-  .panel h3{font-size:.95rem;color:var(--chalk-dim);font-weight:500;margin-bottom:10px}
-
-  /* ---------- player mats ---------- */
-  .mat{border:1px solid rgba(239,234,224,.16);border-top:3px solid var(--pc);
-    background:linear-gradient(180deg,rgba(35,46,51,.96),rgba(22,29,32,.96));
-    border-radius:4px;padding:11px 12px 10px;position:relative;
-    display:flex;flex-direction:column;gap:8px}
-  .mat.active{border-color:var(--lichen);box-shadow:0 0 0 1px var(--lichen) inset}
-  .mat .who{display:flex;align-items:center;gap:7px}
-  .mat .pip{width:10px;height:10px;border-radius:50%;background:var(--pc);flex:none}
-  .mat .name{font-weight:700;font-size:1.02rem;letter-spacing:.01em}
-  .mat .role{font-family:'Spectral',Georgia,serif;font-style:italic;font-size:.8rem;
-    color:var(--chalk-dim);line-height:1.25;margin-top:-6px}
-  .seat{font-size:.68rem;letter-spacing:.07em;color:var(--chalk-dim);
-    border:1px solid rgba(239,234,224,.25);padding:0 5px;border-radius:2px;margin-left:auto}
-  .badge{font-size:.68rem;letter-spacing:.06em;background:var(--lichen);color:#12181A;
-    padding:1px 5px;border-radius:2px;font-weight:700}
-
-  /* stat line */
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
-  .stat{text-align:center;padding:4px 0 3px;border:1px solid rgba(239,234,224,.16);
-    border-radius:2px;font-size:.62rem;letter-spacing:.09em;color:var(--chalk-dim)}
-  .stat b{display:block;font-size:1.1rem;line-height:1.1;font-variant-numeric:tabular-nums}
-  .stat.s b{color:var(--str)} .stat.e b{color:var(--end)} .stat.t b{color:var(--tec)}
-
-  /* the ability card sitting in its slot */
-  .cardslot{border:1px solid rgba(156,176,78,.45);border-left:3px solid var(--lichen);
-    border-radius:3px;padding:7px 8px;background:rgba(156,176,78,.07);min-height:74px}
-  .cardhead{display:flex;justify-content:space-between;align-items:baseline;gap:6px;margin-bottom:3px}
-  .cname{color:var(--lichen);font-weight:700;font-size:.83rem;line-height:1.15}
-  .cuses{font-size:.66rem;color:var(--chalk-dim);white-space:nowrap}
-  .ctext{font-size:.72rem;line-height:1.35;color:var(--chalk-dim)}
-
-  /* drop tracker, 8 counters with the ceiling marked */
-  .tlabel{display:flex;justify-content:space-between;align-items:baseline;gap:5px;
-    font-size:.66rem;letter-spacing:.08em;color:var(--chalk-dim);margin-bottom:4px}
-  .tnum{letter-spacing:0;font-size:.76rem;color:var(--chalk);font-weight:600}
-  .track{display:flex;align-items:center;gap:3px}
-  .track .slot{width:13px;height:16px;background:rgba(239,234,224,.10);
-    box-shadow:0 0 0 1px rgba(239,234,224,.18) inset;
-    clip-path:polygon(50% 0,88% 42%,100% 70%,78% 97%,22% 97%,0 70%,12% 42%)}
-  .track .slot.full{background:var(--end);box-shadow:none}
-  .track .slot.over{background:var(--lichen);box-shadow:none}
-  .track .ceil{width:2px;height:18px;background:var(--str);margin:0 3px;flex:none}
-  .thead{font-size:.66rem;color:var(--lichen);margin-top:4px}
-
-  /* counters */
-  .counters{display:flex;gap:6px;margin-top:auto}
-  .ctr{flex:1;text-align:center;border:1px solid rgba(239,234,224,.14);border-radius:2px;
-    padding:3px 2px;font-size:.6rem;letter-spacing:.04em;color:var(--chalk-dim);line-height:1.25}
-  .ctr b{display:block;font-size:1rem;color:var(--chalk);font-variant-numeric:tabular-nums}
-  .ctr.fa b{color:var(--lichen)}
-  .ctr.lives b{color:var(--str)}
-  .ctr.chalks b{color:#9FD4D2}
-  .ctr.where{display:flex;align-items:center;justify-content:center;font-size:.66rem}
+    border:1px solid rgba(239,234,224,.12);border-radius:3px;padding:12px}
+  .panel h3{font-size:.95rem;color:var(--chalk-dim);font-weight:500;margin-bottom:8px}
 
   /* ---------- crag ---------- */
   .cragwrap{background:
       linear-gradient(180deg,rgba(60,78,86,.35),rgba(24,31,34,.15) 55%,rgba(24,31,34,0)),
       var(--rock-dark);
-    border:1px solid rgba(239,234,224,.12);border-radius:3px;padding:18px 10px 0;overflow-x:auto}
+    border:1px solid rgba(239,234,224,.12);border-radius:3px;padding:16px 10px 0;overflow-x:auto}
   .board{width:max-content;margin:0 auto}
   .hexrow{display:flex;margin-top:calc(var(--hexH) * -0.25)}
   .hexrow:first-child{margin-top:0}
@@ -169,127 +114,173 @@
   .gradeCol{display:flex;flex-direction:column;justify-content:space-around;
     font-size:.75rem;color:var(--chalk-dim);padding-right:8px}
 
-  .flash{color:var(--lichen);font-style:normal;font-weight:600}
-  .deckgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px}
-  .dtile{display:flex;flex-direction:column;gap:4px;font-size:.8rem;
-    border:1px solid rgba(239,234,224,.12);border-radius:2px;padding:6px 8px}
-  .dtile .vb{margin-right:9px;white-space:nowrap}
-  .dtile .vb i{margin-right:1px}
-  .dtile.gone{opacity:.32}
-  .dtile.drest{border-color:rgba(62,142,140,.65);background:rgba(62,142,140,.10)}
-  .dtile.drest .dn{color:#9FD4D2}
-  .dtile.dcrux{border-color:rgba(195,69,47,.7);background:rgba(195,69,47,.12)}
-  .dtile.dcrux .dn{color:#F0B5A6}
-  .dtile .dn{color:var(--chalk);display:flex;justify-content:space-between;gap:8px}
-  .dtile .dr{font-weight:700;letter-spacing:.05em}
-  .dtile .dr i{font-style:normal}
-  .dtile .dr .s{color:var(--str)} .dtile .dr .e{color:var(--end)} .dtile .dr .t{color:var(--tec)}
-  .dtile .dc{color:var(--chalk-dim);font-variant-numeric:tabular-nums}
-  .dtotal{grid-column:1/-1;font-size:.8rem;color:var(--chalk-dim);padding-top:4px}
-
-  /* ---------- attempt / dice ---------- */
-  .targetbox{min-height:64px;font-size:.9rem;color:var(--chalk-dim);line-height:1.45}
-  .targetbox b{color:var(--chalk);font-size:1.05rem;display:block;margin-bottom:3px}
+  /* ---------- attempt / dice (Compact) ---------- */
+  .attempt-panel { display: flex; flex-direction: column; gap: 8px; }
+  .targetbox{min-height:48px;font-size:.85rem;color:var(--chalk-dim);line-height:1.3}
+  .targetbox b{color:var(--chalk);font-size:1rem;display:block;margin-bottom:2px}
   
-  .dicerow{display:flex;gap:7px;margin:4px 0 12px}
-  .dicerow-label { width: 45px; flex: none; display: flex; align-items: center; justify-content: flex-end; padding-right: 4px; font-weight: 700; color: var(--chalk-dim); font-size: .7rem; text-transform: uppercase; }
-  .die{flex:1;aspect-ratio:1;border-radius:5px;background:#12181A;
-    border:1px solid rgba(239,234,224,.18);display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:2px;position:relative}
-  .die .face{font-size:1.75rem;font-weight:700;line-height:1}
-  .die .lab{font-size:.62rem;letter-spacing:.06em;color:var(--chalk-dim);text-align:center}
-  .die.s{border-bottom:3px solid var(--str)} .die.e{border-bottom:3px solid var(--end)}
-  .die.t{border-bottom:3px solid var(--tec)}
-  .die.c{border-bottom:3px solid rgba(239,234,224,.45);background:#101517}
-  .die .face.cond{font-size:1.5rem}
+  .dicerow{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px}
+  .dicerow-label { width: 35px; flex: none; display: flex; align-items: center; justify-content: flex-end; padding-right: 4px; font-weight: 700; color: var(--chalk-dim); font-size: .65rem; text-transform: uppercase; }
+  .die{flex:1; min-width: 80px; padding:4px 8px; border-radius:3px; background:#12181A;
+    border:1px solid rgba(239,234,224,.18); display:flex; flex-direction:row;
+    align-items:center; justify-content:space-between; position:relative; border-left:4px solid transparent;}
+  .die .lab{font-size:.6rem;letter-spacing:.05em;color:var(--chalk-dim);text-transform:uppercase}
+  .die .face{font-size:1.15rem;font-weight:700;line-height:1}
+  .die.s{border-left-color:var(--str)} .die.e{border-left-color:var(--end)}
+  .die.t{border-left-color:var(--tec)}
+  .die.c{border-left-color:rgba(239,234,224,.45)}
+  .die .face.cond{font-size:1.05rem}
   .die.rolling{animation:shake .12s infinite}
   @keyframes shake{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(1px,-2px) rotate(-2deg)}100%{transform:translate(-1px,1px) rotate(2deg)}}
   .die .wat{color:var(--end)} .die .chalkface{color:var(--chalk)}
   .die.bumpable{cursor:pointer;box-shadow:0 0 0 2px var(--lichen) inset}
   .die.bumpable:hover{background:#1A2225}
-  .die.bumped::after{content:"+1";position:absolute;top:5px;right:6px;
-    font-size:.66rem;font-weight:700;color:var(--lichen)}
-  .ledger{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
-  .chip{font-size:.7rem;padding:2px 7px;border-radius:2px;border:1px solid rgba(239,234,224,.18);
+  .die.bumped::after{content:"+1";position:absolute;top:2px;right:4px;
+    font-size:.6rem;font-weight:700;color:var(--lichen)}
+
+  .ledger{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+  .chip{font-size:.65rem;padding:2px 6px;border-radius:2px;border:1px solid rgba(239,234,224,.18);
     color:var(--chalk-dim);white-space:nowrap}
   .chip b{font-variant-numeric:tabular-nums;margin-left:2px}
   .chip.down{border-color:rgba(195,69,47,.55);background:rgba(195,69,47,.13);color:#F0B5A6}
   .chip.up{border-color:rgba(62,142,140,.6);background:rgba(62,142,140,.14);color:#9FD4D2}
   .chip.flat{opacity:.75}
   .chip.total{font-weight:700;color:var(--chalk);border-color:rgba(239,234,224,.4)}
-  .delta{font-size:.74rem;font-weight:700;padding:0 4px;border-radius:2px;margin-right:auto}
-  .delta.down{color:#F0B5A6;background:rgba(195,69,47,.22)}
-  .delta.up{color:#9FD4D2;background:rgba(62,142,140,.22)}
 
   /* Move breakdown scorecard */
-  .scorecard { display: grid; grid-template-columns: 45px repeat(4, 1fr); gap: 5px 7px; font-size: .85rem; align-items: center; margin-bottom: 12px; }
-  .sc-row-label { text-align: right; font-weight: 700; color: var(--chalk-dim); font-size: .7rem; text-transform: uppercase; padding-right: 4px; }
-  .sc-cell { border: 1px solid rgba(239,234,224,.14); border-radius: 3px; padding: 6px 0; background: rgba(24,31,34,.5); text-align: center; font-variant-numeric: tabular-nums; }
+  .scorecard { display: grid; grid-template-columns: 40px repeat(4, 1fr); gap: 4px 6px; font-size: .75rem; align-items: center; margin-bottom: 8px; }
+  .sc-row-label { text-align: right; font-weight: 700; color: var(--chalk-dim); font-size: .65rem; text-transform: uppercase; padding-right: 2px; }
+  .sc-cell { border: 1px solid rgba(239,234,224,.14); border-radius: 3px; padding: 4px 0; background: rgba(24,31,34,.5); text-align: center; font-variant-numeric: tabular-nums; }
   .sc-cell.match { border-color: var(--lichen); background: rgba(156,176,78,.15); color: var(--chalk); font-weight: 700; }
   .sc-cell.short { border-color: var(--str); background: rgba(195,69,47,.15); color: var(--chalk); font-weight: 700; }
-  .sc-cond-box { grid-column: 5; grid-row: 1 / 4; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; border: 1px solid rgba(239,234,224,.14); border-radius: 3px; background: rgba(24,31,34,.5); text-align: center; font-size: 1rem; font-weight: 700; }
+  .sc-cond-box { grid-column: 5; grid-row: 1 / 4; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; border: 1px solid rgba(239,234,224,.14); border-radius: 3px; background: rgba(24,31,34,.5); text-align: center; font-size: .85rem; font-weight: 700; }
   .sc-cond-box.match { border-color: var(--lichen); background: rgba(156,176,78,.15); color: var(--lichen); }
   .sc-cond-box.short { border-color: var(--str); background: rgba(195,69,47,.15); color: var(--str); }
-  .sc-cond-sub { font-size: .65rem; color: var(--chalk-dim); font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+  .sc-cond-sub { font-size: .6rem; color: var(--chalk-dim); font-weight: 600; text-transform: uppercase; margin-top: 1px; }
 
-  .verdict{font-family:'Spectral',Georgia,serif;font-size:.95rem;line-height:1.5;
-    border-left:2px solid var(--lichen);padding-left:10px;margin-bottom:10px;min-height:1.4em}
+  .verdict{font-family:'Spectral',Georgia,serif;font-size:.9rem;line-height:1.4;
+    border-left:2px solid var(--lichen);padding-left:8px;margin-bottom:8px;min-height:1.4em}
+  
+  .rollbar .btnrow { display: flex; gap: 6px; flex-wrap: wrap; }
+  .rollbar button { flex: 1; padding: 10px; font-size: .95rem; }
   button.primary.alt{background:transparent;color:var(--chalk);border-color:var(--str)}
   button.primary.alt:hover:not(:disabled){background:rgba(195,69,47,.2);border-color:var(--str)}
-  .log{font-size:.85rem;line-height:1.5;max-height:160px;overflow-y:auto;color:var(--chalk-dim)}
-  .log p{margin:0 0 6px;padding-bottom:6px;border-bottom:1px solid rgba(239,234,224,.07)}
+
+  /* ---------- player mats (Compact Ribbon) ---------- */
+  .matband{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;}
+  .mat{border:1px solid rgba(239,234,224,.16);border-top:3px solid var(--pc);
+    background:linear-gradient(180deg,rgba(35,46,51,.96),rgba(22,29,32,.96));
+    border-radius:4px;padding:6px 8px;position:relative;
+    display:flex;flex-direction:column;gap:5px}
+  .mat.active{border-color:var(--lichen);box-shadow:0 0 0 1px var(--lichen) inset}
+  .mat .who{display:flex;align-items:center;gap:5px}
+  .mat .pip{width:8px;height:8px;border-radius:50%;background:var(--pc);flex:none}
+  .mat .name{font-weight:700;font-size:.9rem;letter-spacing:.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .mat .role{display:none} /* Removed for compact view */
+  .seat{font-size:.6rem;letter-spacing:.05em;color:var(--chalk-dim);
+    border:1px solid rgba(239,234,224,.25);padding:0 3px;border-radius:2px;margin-left:auto}
+  .badge{font-size:.6rem;letter-spacing:.06em;background:var(--lichen);color:#12181A;
+    padding:1px 3px;border-radius:2px;font-weight:700}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}
+  .stat{text-align:center;padding:2px 0 1px;border:1px solid rgba(239,234,224,.16);
+    border-radius:2px;font-size:.55rem;letter-spacing:.05em;color:var(--chalk-dim)}
+  .stat b{display:block;font-size:.85rem;line-height:1.1;font-variant-numeric:tabular-nums}
+  .stat.s b{color:var(--str)} .stat.e b{color:var(--end)} .stat.t b{color:var(--tec)}
+
+  .cardslot{border:1px solid rgba(156,176,78,.45);border-left:3px solid var(--lichen);
+    border-radius:2px;padding:3px 4px;background:rgba(156,176,78,.07);}
+  .cardhead{display:flex;justify-content:space-between;align-items:baseline;gap:4px;margin-bottom:1px}
+  .cname{color:var(--lichen);font-weight:700;font-size:.7rem;line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .cuses{font-size:.55rem;color:var(--chalk-dim);white-space:nowrap}
+  .ctext{font-size:.6rem;line-height:1.2;color:var(--chalk-dim); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+
+  .tlabel{display:flex;justify-content:space-between;align-items:baseline;gap:3px;
+    font-size:.55rem;letter-spacing:.05em;color:var(--chalk-dim);margin-bottom:2px}
+  .tnum{letter-spacing:0;font-size:.65rem;color:var(--chalk);font-weight:600}
+  .track{display:flex;align-items:center;gap:2px}
+  .track .slot{width:9px;height:12px;background:rgba(239,234,224,.10);
+    box-shadow:0 0 0 1px rgba(239,234,224,.18) inset;
+    clip-path:polygon(50% 0,88% 42%,100% 70%,78% 97%,22% 97%,0 70%,12% 42%)}
+  .track .slot.full{background:var(--end);box-shadow:none}
+  .track .slot.over{background:var(--lichen);box-shadow:none}
+  .track .ceil{width:2px;height:14px;background:var(--str);margin:0 1px;flex:none}
+  .thead{font-size:.55rem;color:var(--lichen);margin-top:1px}
+
+  .counters{display:flex;gap:3px;margin-top:auto}
+  .ctr{flex:1;text-align:center;border:1px solid rgba(239,234,224,.14);border-radius:2px;
+    padding:2px 1px;font-size:.5rem;letter-spacing:.02em;color:var(--chalk-dim);line-height:1.15}
+  .ctr b{display:block;font-size:.75rem;color:var(--chalk);font-variant-numeric:tabular-nums}
+  .ctr.fa b{color:var(--lichen)}
+  .ctr.lives b{color:var(--str)}
+  .ctr.chalks b{color:#9FD4D2}
+  .ctr.where{display:flex;align-items:center;justify-content:center;font-size:.55rem}
+
+  /* ---------- narrative ---------- */
+  .log{font-size:.8rem;line-height:1.4;max-height:200px;overflow-y:auto;color:var(--chalk-dim)}
+  .log p{margin:0 0 5px;padding-bottom:5px;border-bottom:1px solid rgba(239,234,224,.07)}
   .log p b{color:var(--chalk)}
-  .log p.entry{display:flex;flex-direction:column;gap:2px;padding:7px 8px;margin-bottom:7px;
+  .log p.entry{display:flex;flex-direction:column;gap:2px;padding:6px 7px;margin-bottom:6px;
     background:rgba(239,234,224,.035);border-left:2px solid rgba(239,234,224,.22);border-bottom:0}
-  .ehead{font-size:.84rem;color:var(--chalk-dim)}
-  .ehead b{font-size:.9rem}
-  .ehead em{font-style:normal;color:var(--lichen);font-size:.76rem}
-  .eline{font-size:.78rem}
+  .ehead{font-size:.8rem;color:var(--chalk-dim)}
+  .ehead b{font-size:.85rem}
+  .ehead em{font-style:normal;color:var(--lichen);font-size:.7rem}
+  .eline{font-size:.75rem}
   .eline i{font-style:normal;font-weight:700}
   .eline s{text-decoration:none;opacity:.35;margin:0 1px}
   .eabil{color:var(--lichen)}
   .eblind{color:#9FD4D2}
   .emoney{font-variant-numeric:tabular-nums}
-  .eout{color:var(--chalk);font-weight:600;font-size:.78rem}
+  .eout{color:var(--chalk);font-weight:600;font-size:.75rem}
 
-  details{font-size:.86rem;line-height:1.55;color:var(--chalk-dim)}
-  details summary{cursor:pointer;color:var(--chalk);font-weight:600;margin-bottom:8px}
-  details ul{padding-left:18px;margin:6px 0}
-  details li{margin-bottom:5px}
-  .legend{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:.82rem;align-items:center}
-  .legend b{font-size:1.05rem}
+  /* ---------- explanations ---------- */
+  .explanations-panel details{font-size:.85rem;line-height:1.5;color:var(--chalk-dim); margin-bottom: 8px;}
+  .explanations-panel details summary{cursor:pointer;color:var(--chalk);font-weight:600;margin-bottom:6px; padding-bottom: 4px; border-bottom: 1px solid rgba(239,234,224,.1);}
+  .explanations-panel ul{padding-left:18px;margin:4px 0}
+  .explanations-panel li{margin-bottom:4px}
+  .legend{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:.8rem;align-items:center}
+  .legend b{font-size:.95rem}
 
-  /* ---------- tablet / responsive ---------- */
-  @media (max-width:1100px){
-    .matband{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .deckgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px}
+  .dtile{display:flex;flex-direction:column;gap:4px;font-size:.75rem;
+    border:1px solid rgba(239,234,224,.12);border-radius:2px;padding:5px 7px}
+  .dtile .vb{margin-right:8px;white-space:nowrap}
+  .dtile .vb i{margin-right:1px}
+  .dtile.gone{opacity:.32}
+  .dtile.drest{border-color:rgba(62,142,140,.65);background:rgba(62,142,140,.10)}
+  .dtile.drest .dn{color:#9FD4D2}
+  .dtile.dcrux{border-color:rgba(195,69,47,.7);background:rgba(195,69,47,.12)}
+  .dtile.dcrux .dn{color:#F0B5A6}
+  .dtile .dn{color:var(--chalk);display:flex;justify-content:space-between;gap:6px}
+  .dtile .dr{font-weight:700;letter-spacing:.05em}
+  .dtile .dr i{font-style:normal}
+  .dtile .dr .s{color:var(--str)} .dtile .dr .e{color:var(--end)} .dtile .dr .t{color:var(--tec)}
+  .dtile .dc{color:var(--chalk-dim);font-variant-numeric:tabular-nums}
+  .dtotal{grid-column:1/-1;font-size:.75rem;color:var(--chalk-dim);padding-top:4px}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:850px){
+    .matband { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
   /* ---------- phone ---------- */
   @media (max-width:640px){
-    .shell{padding:12px 10px 40px}
-    header.top{gap:10px 14px;padding-bottom:10px;margin-bottom:14px}
+    .shell{padding:12px 10px 40px; gap:12px;}
+    header.top{gap:10px 14px;padding-bottom:10px;}
     .wordmark{font-size:1.75rem}
     .routeline{font-size:.9rem}
     .toolbar{margin-left:0;width:100%}
     .toolbar button{flex:1;min-height:44px}
     .cragwrap{padding:12px 4px 0;overflow-x:hidden}
     .gradeCol{font-size:.68rem;padding-right:4px}
-    .panel{padding:12px 11px}
-    .matband{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
-    .mat{padding:9px 9px 8px;gap:6px}
-    .mat .role{display:none}
-    .cardslot{min-height:0}
-    .ctext{font-size:.68rem}
-    .die .face{font-size:1.3rem}
-    .die .lab{font-size:.55rem;letter-spacing:.02em}
-    .dicerow{gap:5px}
-    .dicerow-label { width: 35px; }
+    .panel{padding:10px 8px}
+    .matband { grid-template-columns: 1fr; }
+    .die { min-width: calc(50% - 4px); }
     .scorecard { grid-template-columns: 35px repeat(4, 1fr); gap: 4px 5px; }
-    .sc-row-label { font-size: .6rem; }
+    .sc-row-label { font-size: .55rem; }
     .log{max-height:150px}
     .ground{font-size:.8rem;padding:10px 0 12px}
-    /* keep the roll button within thumb reach while the board is on screen */
-    .rollbar{position:sticky;bottom:0;z-index:5;padding:10px 0 4px;
+    .rollbar{position:sticky;bottom:0;z-index:5;padding:8px 0 4px;
       background:linear-gradient(180deg,rgba(24,31,34,0),rgba(24,31,34,.95) 40%)}
   }
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -315,7 +306,7 @@
     </div>
   </header>
 
-  <!-- ============ 2. Map (Crag) ============ -->
+  <!-- ============ 2. Maps ============ -->
   <div class="panel map-panel">
     <div class="cragwrap">
       <div style="display:flex;gap:4px;justify-content:center">
@@ -327,26 +318,16 @@
     </div>
   </div>
 
-  <!-- ============ 3. Player Mats ============ -->
-  <div id="mats" class="matband"></div>
-
-  <!-- ============ 4. Narrative Strip ============ -->
-  <div class="panel log-panel">
-    <h3>Game Narrative</h3>
-    <div class="log" id="log"></div>
-  </div>
-
-  <!-- ============ 5. Interactive Die Roll Area ============ -->
+  <!-- ============ 3. Interactive Die Roll Area (Compact) ============ -->
   <div class="panel attempt-panel" id="colAttempt">
-    <h3 id="turnLabel">Turn</h3>
+    <h3 id="turnLabel" style="margin-bottom:4px;">Turn</h3>
     <div class="targetbox" id="targetbox">Pick a hold to try for.</div>
     
     <div class="dicerow">
-      <div class="dicerow-label">Roll</div>
-      <div class="die s"><div class="face" id="f0">–</div><div class="lab">strength</div></div>
-      <div class="die e"><div class="face" id="f1">–</div><div class="lab">endurance</div></div>
-      <div class="die t"><div class="face" id="f2">–</div><div class="lab">technique</div></div>
-      <div class="die c"><div class="face" id="f3">–</div><div class="lab">conditions</div></div>
+      <div class="die s"><div class="lab">STR</div><div class="face" id="f0">–</div></div>
+      <div class="die e"><div class="lab">END</div><div class="face" id="f1">–</div></div>
+      <div class="die t"><div class="lab">TEC</div><div class="face" id="f2">–</div></div>
+      <div class="die c"><div class="lab">COND</div><div class="face" id="f3">–</div></div>
     </div>
     <div id="breakdown" hidden></div>
     
@@ -361,8 +342,18 @@
     </div></div>
   </div>
 
+  <!-- ============ 4. Mats (Compact) ============ -->
+  <div id="mats" class="matband"></div>
+
+  <!-- ============ 5. Narrative Log ============ -->
+  <div class="panel log-panel">
+    <h3 style="margin-bottom:6px;">Game Narrative Log</h3>
+    <div class="log" id="log"></div>
+  </div>
+
   <!-- ============ 6. Explanations ============ -->
   <div class="panel explanations-panel">
+    <h3 style="margin-bottom:8px;">Instruction Manual</h3>
     <details>
       <summary>Dice Faces Legend</summary>
       <div class="legend">
@@ -377,38 +368,52 @@
       </div>
     </details>
     <details>
-      <summary>How this prototype resolves a move</summary>
+      <summary>Core Mechanics & Turn Resolution</summary>
       <ul>
         <li>Your character card carries a fixed stat line. Your ability is dealt at random from a pool of twelve at the start of the route, so the same climber plays differently each game. Abilities are marked ALWAYS, PER ATTEMPT or PER ROUTE.</li>
         <li>The tiles come in sets of 15, and every route is a whole number of sets: 15, 30 or 45 holds. So the mix of hold types is identical in every game, one rest ledge per set, and the tank grows with the route.</li>
         <li>The crag is one shuffled deck, dealt face down at random. No difficulty gradient, no guaranteed rest ledge.</li>
         <li>What remains hidden is public knowledge, since the deck is fixed. You can count what is left, but never where it is.</li>
-        <li>Once a climber has topped out, everyone else gets one last turn. On that turn only, anyone two or more rows below the summit may lunge, attempting a hold two rows straight up for the row toll plus 1 drop. So from row 3 you still have a shot at the top, and from row 2 you are genuinely out of it.</li>
         <li>Move up into either hold above you, or sideways along your row. No downclimbing. One climber per hold, except the rest ledge and except a Poacher, who can take an occupied hold and swap places with the climber on it.</li>
         <li>Rows 1 and 2 are free to reach for. From row 3 up, every attempt costs 1 drop before the dice, win or lose. If that drop alone would empty you, the hold is out of reach and you must rest first.</li>
         <li>Then roll. Three category dice, each showing 0, 1, 1, 2, 2, 3, plus one condition die rolled with them. A face-down hold turns over after the roll.</li>
         <li>The condition die has six faces: +1, &minus;1, &minus;1, drop, drop, slip. Both act on ONE category, never on your total. The +1 goes where you are furthest short, your choice. The &minus;1 is not your choice: it lands on the category the hold demands MOST, the crux of the move, so you only escape it if you happened to overshoot there. A drop returns 1 water, a slip costs 1.</li>
         <li>A requirement of 3 needs a rolled 3, or a 2 with a +1. Chalk counts as a flat 2 and ignores your modifiers. A -1 in a category makes a 3 there impossible to match, so you will always pay something on those holds.</li>
-        <li>Each hold type comes in several versions with different numbers, keeping one signature category fixed. A flat edge might be 2/1/1, 1/2/1 or 1/1/2, so the name tells you the family, never the exact demand.</li>
         <li>Character boosts add 1 to a category, after the hold is face up, once per attempt.</li>
+      </ul>
+    </details>
+    <details>
+      <summary>Success, Failure & Bailing</summary>
+      <ul>
         <li>Missing by exactly 1 is considered a clean success and costs nothing.</li>
         <li>Missing by 2 gives you a choice. Take the hold and pay 2 drops, or back off for 1 drop and stay where you are.</li>
         <li>Missing by 3 or more means you are too far gone to back off. You must commit and fall.</li>
         <li><b>Point of No Return:</b> If the shortfall payment is equal to or greater than your remaining drops, you pass the point of no return. You cannot back off and must commit and fall.</li>
         <li><b>The Reimbursement Rule:</b> If you attempt an unexplored hold that is vertically above you, and you successfully establish it, you are immediately refunded the height toll you paid to reach it.</li>
+      </ul>
+    </details>
+    <details>
+      <summary>Water Economy & Resting</summary>
+      <ul>
         <li>A rest ledge returns 2 drops when you establish it.</li>
         <li>Chalking up on your turn instead of climbing returns 2 drops. You may only chalk up <b>ONCE</b> per game.</li>
         <li>Drops leave you in exactly four places: the row toll before the dice, a slip on the condition die, forcing a move you came up short on, and backing off. Rows 1 and 2 have no toll at all.</li>
         <li>Running out of water is the ONLY way to come off the wall. It can happen from the height toll, from forcing a move, or from backing off. Water symbols are counted first, so they can save you.</li>
         <li>When you empty your water you drop 2 rows, landing on that hold in your column and turning it face up, then refill to full. Below row 3 that means the ground. If the landing hold is taken you drop another row.</li>
+        <li>That head start sits ABOVE your ceiling. The mat has 8 drop counters, but only the first 5 can ever be recovered, marked by the red line. Spend the extras and they are gone, and a pump-out refills you to 5 like everyone else.</li>
+      </ul>
+    </details>
+    <details>
+      <summary>Winning & Race Rules</summary>
+      <ul>
         <li>Play solo against the route with 3 lives, or with up to four climbers sharing one screen, any mix of people and CPU. Pass the device when the panel tells you to.</li>
         <li>Climbers race the same crag. Who leads is random each route. Climbers later in the order may start with extra drops above their ceiling, tuned per route, because turn order is worth different amounts on a short boulder problem and on a big wall.</li>
-        <li>That head start sits ABOVE your ceiling. The mat has 8 drop counters, but only the first 5 can ever be recovered, marked by the red line. Spend the extras and they are gone, and a pump-out refills you to 5 like everyone else.</li>
+        <li>Once a climber has topped out, everyone else gets one last turn. On that turn only, anyone two or more rows below the summit may lunge, attempting a hold two rows straight up for the row toll plus 1 drop. So from row 3 you still have a shot at the top, and from row 2 you are genuinely out of it.</li>
         <li>When a climber tops out, everyone else gets one last turn to match it. If more than one tops out, most water left wins, then most first ascents.</li>
       </ul>
     </details>
     <details>
-      <summary>Tiles still face down</summary>
+      <summary>Tiles Still Hidden</summary>
       <div class="deckgrid" id="deckgrid"></div>
     </details>
   </div>
@@ -689,7 +694,7 @@ function newCrag(){
   say(`<b>${MAPS[mapIdx].n}</b>, ${COLS} by ${ROWS}. You are <b>${players[0].ch.n}</b> with <b>${players[0].ability.n}</b>.`);
   say(`Four on the route. Order: ${order}. Climbers later in the order start with a fuller tank.`);
   drawAll(); resetDice();
-  if(players[cur].isBot) later(botTurn, 1500);
+  if(players[cur].isBot) later(botTurn, 2500);
 }
 
 /* ============================================================
@@ -1607,15 +1612,22 @@ function backOff(){
 }
 
 function finishAttempt(v, moved, restGain, forceFall){
-  if(!target) return;
   const p = players[cur];
-  const r = target.r;
-
-  const regain = restGain;   /* the condition die already settled when the dice landed */
-  if(regain){
-    const before = Math.max(0,p.water);
-    p.water = Math.max(p.water, Math.min(p.max, p.water + regain));   /* never claws back a head start */
-    if(p.water > before) v.push(`The climb returned ${p.water-before} drop${p.water-before>1?'s':''}.`);
+  
+  // Only process standard attempt logic if there is a target selected
+  if(target) {
+      const r = target.r;
+      const regain = restGain;   /* the condition die already settled when the dice landed */
+      if(regain){
+        const before = Math.max(0,p.water);
+        p.water = Math.max(p.water, Math.min(p.max, p.water + regain));   /* never claws back a head start */
+        if(p.water > before) v.push(`The climb returned ${p.water-before} drop${p.water-before>1?'s':''}.`);
+      }
+      
+      const net = p.water - startWater;
+      p.delta = net;
+      logAttempt(p, lastEval, pending.slice(0,3).map(f=>f.v), moved, net);
+      drawLedger(net, p.water, p.max);
   }
 
   if(forceFall || p.water <= 0){
@@ -1625,19 +1637,19 @@ function finishAttempt(v, moved, restGain, forceFall){
       say(lives ? `<b>${lives}</b> ${lives===1?'life':'lives'} left.` : `<b>No lives left. The route wins.</b>`);
       if(lives <= 0){ defeated = true; gameOver = true; }
     }
-    const from = p.pos ? p.pos.r : r;
-    const col  = p.pos ? p.pos.c : target.c;
+    const from = p.pos ? p.pos.r : 0;
+    const col  = p.pos ? p.pos.c : (target ? target.c : 0);
     let land = from - RULES.fallRows;
     while(land >= 0 && !canLand(p, land, col)) land--;   /* skip anything occupied */
     if(land >= 0){
       board[land][col].up = true;
       p.pos = {r:land, c:col};
       v.push(`${forceFall?'Off the wall.':'Completely pumped out.'} ${p.ch.n} drops ${from-land} row${from-land>1?'s':''} and catches the ${board[land][col].hold.n.toLowerCase()} on row ${land+1}, back on full water.`);
-      say(`<b>${p.ch.n} ${forceFall?'CAME OFF':'PUMPED OUT'}</b> at row ${from+1} and dropped to row ${land+1}.`);
+      say(`<b>${p.ch.n} PUMPED OUT</b> at row ${from+1} and dropped to row ${land+1}.`);
     } else {
       p.pos = null;
       v.push(`Completely pumped out. ${p.ch.n} drops all the way to the ground, back on full water.`);
-      say(`<b>${p.ch.n} ${forceFall?'CAME OFF':'PUMPED OUT'}</b> at row ${from+1} and is back on the ground.`);
+      say(`<b>${p.ch.n} PUMPED OUT</b> at row ${from+1} and is back on the ground.`);
     }
     p.water = p.max;
     if(p.falls===1) say(`The flash attempt is over for ${p.ch.n}.`);
@@ -1658,18 +1670,15 @@ function finishAttempt(v, moved, restGain, forceFall){
     }
   }
 
-  const net = p.water - startWater;
-  p.delta = net;
-  logAttempt(p, lastEval, pending.slice(0,3).map(f=>f.v), moved, net);
-  drawLedger(net, p.water, p.max);
-  setVerdict(v.join(' '));
+  if(v.length > 0) setVerdict(v.join(' '));
+  
   target = null; lastEval = null; pending = null;
   boosts = [0,0,0]; freeCats = [false,false,false]; phase = 'select';
   onsightDeclared = false; attemptReach = false;
   document.querySelectorAll('.dicerow .die').forEach(d=>d.classList.remove('bumpable'));
   drawAll();
   
-  later(nextTurn, 1500);
+  later(nextTurn, 2500);
 }
 
 /* --------------- turn order --------------- */
@@ -1701,7 +1710,7 @@ function nextTurn(){
   }
   drawAll();
   updateControls();
-  if(players[cur].isBot) later(botTurn, 1500);
+  if(players[cur].isBot) later(botTurn, 2500);
 }
 
 function passTurn(){
@@ -1728,7 +1737,7 @@ function passTurn(){
   target = null;
   drawAll();
   
-  later(nextTurn, 1500);
+  later(nextTurn, 2500);
 }
 
 /* --------------- the CPU climber --------------- */
@@ -1780,14 +1789,14 @@ function botDecide(){
     const wasReroll = opt.kind === 'reroll';
     applyBoost(best);
     /* a reroll spins the die, so come back once the new face has landed */
-    if(wasReroll){ later(botDecide, 1000); return; }
+    if(wasReroll){ later(botDecide, 1500); return; }
   }
   const n = lastEval.net;
-  if(comesOff(p, lastEval)){ later(comeOff, 2000); return; }
+  if(comesOff(p, lastEval)){ later(comeOff, 3000); return; }
   const pay = payment(p,n);
   const ceiling = p.water >= 4 ? 3 : 2;
   const climb = pay===0 || mustCommit(p, lastEval) || (affordable(p,n) && pay <= ceiling);
-  later(()=>{ climb ? climbIt() : backOff(); }, 2000);
+  later(()=>{ climb ? climbIt() : backOff(); }, 3000);
 }
 
 /* is spending the tap actually worth it for the bot? */
@@ -1837,7 +1846,7 @@ function botTurn(){
     drawMats();
   }
   drawBoard(); drawTurn(); resetDice();
-  later(doRoll, 1500);
+  later(doRoll, 2500);
 }
 
 /* --------------- wiring --------------- */
